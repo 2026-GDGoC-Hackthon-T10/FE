@@ -1,0 +1,539 @@
+/* games/Screen/ProblemRenderer.css */
+/* ✅ IssuePage.css 느낌(네가 준 스타일)로 ProblemRenderer 전부 통일 */
+/* ✅ drag_patch: PATCH는 위에 길게, 선지 3개는 가로 3칸 카드 */
+/* ✅ erase_line 삐져나옴/울퉁불퉁 방지(overflow/box-sizing/ellipsis) */
+
+.stagePlay{
+    width: min(980px, calc(100% - 24px));
+    margin: 0 auto;
+    padding: 22px 22px 18px;
+    border-radius: 22px;
+    border: 1px solid rgba(108,231,255,.18);
+    background: linear-gradient(180deg, rgba(10,14,28,.72), rgba(6,10,22,.66));
+    box-shadow: 0 26px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
+    color: rgba(240,245,255,.96);
+    overflow: hidden;
+    position: relative;
+}
+
+.stagePlay *{ box-sizing: border-box; }
+
+.stageQuestion{
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: rgba(240,245,255,.96);
+    margin: 0 0 14px;
+}
+
+.stageHint{
+    margin-top: 14px;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+}
+
+.stageError{
+    width: min(980px, calc(100% - 24px));
+    margin: 0 auto;
+    padding: 18px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,107,107,.30);
+    background: rgba(20,10,12,.70);
+    color: rgba(255,240,240,.92);
+    box-shadow: 0 26px 60px rgba(0,0,0,.55);
+    overflow: hidden;
+}
+
+.stageActions{
+    margin-top: 16px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* 버튼 (IssuePage.css 톤) */
+.btnPrimary,
+.btnGhost{
+    -webkit-appearance:none;
+    appearance:none;
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+    letter-spacing: .02em;
+    transition: transform .08s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+}
+
+.btnPrimary{
+    border: 1px solid rgba(108,231,255,.38);
+    background: rgba(108,231,255,.10);
+    color: rgba(220,245,255,.96);
+}
+.btnGhost{
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(233,240,255,.92);
+}
+.btnPrimary:hover,
+.btnGhost:hover{
+    transform: translateY(-1px);
+}
+.btnPrimary:disabled,
+.btnGhost:disabled{
+    opacity: .55;
+    cursor: not-allowed;
+    transform:none;
+}
+
+/* =========================================
+   1) drag_patch (IssuePage.css 느낌으로)
+   - PATCH: 상단 가로 긴 칩
+   - targets: 가로 3개 카드
+========================================= */
+.patchWrap{ margin-top: 4px; }
+
+.patchBoard{
+    margin-top: 14px;
+    position: relative;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: radial-gradient(120% 100% at 20% 15%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%),
+    rgba(6,8,14,.28);
+    padding: 14px;
+    overflow: hidden;
+}
+
+.patchChip{
+    width: 100%;
+    height: 56px;
+    border-radius: 16px;
+    border: 1px solid rgba(108,231,255,.40);
+    background: rgba(108,231,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(108,231,255,.08);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    letter-spacing: .18em;
+    color: rgba(220,245,255,.96);
+}
+.patchChip:active{ cursor: grabbing; }
+
+.patchTargets{
+    margin-top: 12px;
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.patchTarget{
+    border-radius: 18px;
+    border: 1px solid rgba(108,231,255,.18);
+    background: rgba(10,14,28,.62);
+    padding: 14px 12px 12px;
+    box-shadow: 0 16px 34px rgba(0,0,0,.35);
+    transition: transform .08s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+    color: rgba(240,245,255,.96);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.patchTarget:hover{
+    border-color: rgba(108,231,255,.32);
+    background: rgba(108,231,255,.06);
+    transform: translateY(-1px);
+}
+
+.patchTarget.active{
+    border-color: rgba(108,231,255,.38);
+    background: rgba(108,231,255,.08);
+    box-shadow: 0 0 0 1px rgba(108,231,255,.10), 0 16px 34px rgba(0,0,0,.35);
+}
+
+.patchTargetK{
+    font-size: 11px;
+    letter-spacing: .14em;
+    font-weight: 900;
+    color: rgba(220,245,255,.95);
+}
+
+.patchTargetT{
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.35;
+    color: rgba(240,245,255,.96);
+    word-break: keep-all;
+    min-height: 40px;
+}
+
+.patchTargetS{
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+}
+
+/* 드롭 안내 텍스트가 눌리기/드롭 힌트로 보이게 */
+.patchTarget[tabindex="0"]{ outline: none; }
+
+/* =========================================
+   2) erase_line (깨짐/삐져나옴 해결)
+========================================= */
+.eraseBox{
+    margin-top: 12px;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.eraseLineBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    width: 100%;
+    border-radius: 16px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+    padding: 12px 12px;
+    cursor:pointer;
+    color: rgba(240,245,255,.95);
+
+    display:grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+
+    overflow: hidden;
+    transition: transform .08s ease, background .12s ease, border-color .12s ease;
+}
+
+.eraseLineBtn:hover{
+    background: rgba(108,231,255,.06);
+    border-color: rgba(108,231,255,.22);
+    transform: translateY(-1px);
+}
+
+.eraseLineBtn.active{
+    border-color: rgba(255,107,107,.35);
+    background: rgba(255,107,107,.08);
+}
+
+.eraseNo{
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(170,186,220,.82);
+    text-align: right;
+}
+
+.eraseText{
+    min-width: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================
+   3) type_fall_multi (IssuePage 톤)
+========================================= */
+.typeFallLane{
+    margin-top: 14px;
+    position: relative;
+    height: 240px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: radial-gradient(120% 100% at 20% 15%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%),
+    rgba(6,8,14,.28);
+    overflow: hidden;
+    display:grid;
+    place-items:center;
+}
+
+.typeFallDrop{
+    position:absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.typeFallCode{
+    display:inline-block;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(108,231,255,.28);
+    background: rgba(10,14,28,.68);
+    color: rgba(240,245,255,.96);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    box-shadow: 0 14px 30px rgba(0,0,0,.32);
+    max-width: min(720px, calc(100% - 40px));
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.typeFallFloor{
+    position:absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 16px;
+    background: linear-gradient(90deg, rgba(108,231,255,.0), rgba(108,231,255,.12), rgba(108,231,255,0));
+    opacity: .55;
+}
+
+.typeFallInputRow{
+    margin-top: 12px;
+    display:flex;
+    gap: 10px;
+}
+
+.typeFallInput{
+    flex: 1 1 auto;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(240,245,255,.95);
+    padding: 0 14px;
+    outline: none;
+    font-size: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+}
+.typeFallInput::placeholder{ color: rgba(170,186,220,.55); }
+
+/* =========================================
+   4) maze_ox (간단 유지)
+========================================= */
+.mazeRow{
+    margin-top: 12px;
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.mazeTokenBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(233,240,255,.92);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor:pointer;
+    font-weight: 900;
+}
+.mazeTokenBtn.active{
+    border-color: rgba(108,231,255,.38);
+    background: rgba(108,231,255,.10);
+    box-shadow: 0 0 0 1px rgba(108,231,255,.10);
+}
+.mazeZones{
+    margin-top: 12px;
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* =========================================
+   5) rps_tradeoff
+========================================= */
+.rpsGrid{
+    margin-top: 12px;
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.rpsCard{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(108,231,255,.18);
+    background: rgba(10,14,28,.62);
+    border-radius: 18px;
+    padding: 14px 12px 12px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 16px 34px rgba(0,0,0,.35);
+    transition: transform .08s ease, background .12s ease, border-color .12s ease;
+    color: rgba(240,245,255,.96);
+    min-width: 0;
+    overflow:hidden;
+}
+.rpsCard:hover{
+    border-color: rgba(108,231,255,.32);
+    background: rgba(108,231,255,.06);
+    transform: translateY(-1px);
+}
+.rpsIcon{ font-size: 22px; line-height: 1; }
+.rpsHand{
+    margin-top: 8px;
+    font-size: 11px;
+    letter-spacing: .16em;
+    font-weight: 900;
+    color: rgba(190,205,235,.86);
+}
+.rpsOpt{
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 900;
+    color: rgba(240,245,255,.96);
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================
+   6) rhythm_triage
+========================================= */
+.rhTop{
+    margin-top: 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.rhMeta{
+    display:flex;
+    gap: 10px;
+    flex: 1 1 auto;
+    justify-content:center;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+    font-weight: 900;
+}
+.rhBar{
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(0,0,0,.18);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.rhBarFill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(108,231,255,.0), rgba(108,231,255,.22), rgba(108,231,255,0));
+    transition: width .06s linear;
+}
+
+.rhLaneRow{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.rhLaneBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(108,231,255,.18);
+    background: rgba(10,14,28,.62);
+    border-radius: 18px;
+    padding: 14px 12px 12px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 16px 34px rgba(0,0,0,.35);
+    transition: transform .08s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+    color: rgba(240,245,255,.96);
+    min-width: 0;
+    overflow:hidden;
+}
+.rhLaneBtn:hover{
+    border-color: rgba(108,231,255,.32);
+    background: rgba(108,231,255,.06);
+    transform: translateY(-1px);
+}
+.rhLaneBtn:active{ transform: translateY(0); }
+.rhLaneBtn:disabled{ cursor:not-allowed; opacity:.55; }
+
+.rhLaneK{
+    width: 26px;
+    height: 26px;
+    border-radius: 10px;
+    border: 1px solid rgba(108,231,255,.28);
+    background: rgba(108,231,255,.10);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    color: rgba(220,245,255,.95);
+}
+.rhLaneT{
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 900;
+    color: rgba(240,245,255,.96);
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+.rhLaneS{
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(190,205,235,.82);
+}
+.rhNext{
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+    text-align: right;
+}
+
+/* =========================================
+   반응형
+========================================= */
+@media (max-width: 980px){
+    .patchTargets{ grid-template-columns: 1fr; }
+    .rpsGrid{ grid-template-columns: 1fr; }
+    .rhLaneRow{ grid-template-columns: 1fr; }
+    .rhMeta{ justify-content:flex-start; }
+    .typeFallInputRow{ flex-direction: column; }
+}
+
+/* ====== EMERGENCY VISIBILITY FIX ====== */
+.stagePlay,
+.patchWrap,
+.stagePlay *{
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.stagePlay{
+    display: block !important;
+    position: relative !important;
+    z-index: 50 !important;
+    min-height: 240px !important;
+}
+
+/* 부모가 잘라먹는 경우 대비 */
+.issueCard,
+.issueWrap,
+.issuePage,
+.issuePageRoot{
+    overflow: visible !important;
+}
+
+/* 혹시 transform으로 화면 밖으로 밀린 경우 대비 */
+.stagePlay{
+    transform: none !important;
+}
+
+/* 텍스트가 배경색이랑 같아지는 경우 대비 */
+.stagePlay{
+    color: rgba(240,245,255,.96) !important;
+}
+.stagePlay *{
+    color: inherit;
+}
+
+/* 드롭/선지 영역이 0px 되는 경우 대비 */
+.patchBoard{ min-height: 180px !important; }
+.patchTargets{ min-height: 120px !important; }
+
+

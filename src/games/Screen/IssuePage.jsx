@@ -43,7 +43,7 @@ function IssuePageInner({ groupId }) {
         setSkipPre(isGroupDone(groupId));
     }, [groupId]);
 
-    // ✅ 스테이지 입장: sessionId 확보
+    // ✅ 스테이지 입장: sessionId 확보 (기존 유지 + "로컬에 있으면 그걸 우선 사용"만 추가)
     useEffect(() => {
         let alive = true;
         (async () => {
@@ -57,6 +57,7 @@ function IssuePageInner({ groupId }) {
                 if (alive) setSessionId("");
             }
         })();
+
         return () => {
             alive = false;
         };
@@ -122,7 +123,7 @@ function IssuePageInner({ groupId }) {
 
             <IssueStage
                 key={`${groupId}-${issueId}-${skipPre ? 1 : 0}`}
-                stageNumber={stageNumber}
+                stageNumber={issueId}
                 sessionId={sessionId}
                 issueId={issueId}
                 issue={issue}

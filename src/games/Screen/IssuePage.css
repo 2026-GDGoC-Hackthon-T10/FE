@@ -14,6 +14,8 @@
     z-index: 3;
 }
 
+/* ✅ 하단 말풍선 때문에 필요했던 패딩(170px)은 유지하되,
+   1번 문제에서 겹침은 “타겟 absolute + pointer-events none”이 원인이었음 */
 .issueCard{
     border-radius: 22px;
     border: 1px solid rgba(108,231,255,.18);
@@ -138,33 +140,122 @@
     white-space: pre;
 }
 
-.issueBoard{
+/* =========================
+   ✅ 1번(DragPatch) 전용 3카드 가로 배치
+   ========================= */
+.issue1Grid{
     margin-top: 16px;
-    position: relative;
-    height: 240px;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr .75fr; /* 좌/중/우 */
+    gap: 12px;
+    align-items: start;
+}
+
+.issue1Card{
     border-radius: 18px;
     border: 1px solid rgba(27,42,85,.55);
     background:
-            radial-gradient(120% 100% at 20% 15%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%),
-            rgba(6,8,14,.28);
-    overflow: hidden;
+            radial-gradient(120% 120% at 20% 10%, rgba(108,231,255,.08), rgba(108,231,255,0) 55%),
+            rgba(6,8,14,.22);
+    padding: 14px;
+    box-shadow: 0 16px 34px rgba(0,0,0,.25);
 }
 
-/* targets */
+.issue1CardTitle{
+    font-size: 11px;
+    letter-spacing: .16em;
+    font-weight: 900;
+    color: rgba(220,245,255,.95);
+    text-transform: uppercase;
+}
+
+.issue1CardSub{
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(190,205,235,.86);
+}
+
+.issue1Submit{
+    margin-top: 12px;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media (max-width: 860px){
+    .issue1Grid{ grid-template-columns: 1fr; }
+}
+
+/* =========================
+   ✅ 1번(DragPatch) 보드 + 타겟 (겹침/클릭불가 해결)
+   - 기존 absolute + pointer-events:none 제거
+   ========================= */
+.patchBoard{
+    display:flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* PATCH draggable */
+.patchChip{
+    width: 100%;
+    height: 62px;
+    border-radius: 16px;
+    border: 1px solid rgba(108,231,255,.40);
+    background: rgba(108,231,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(108,231,255,.08);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    display:flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items:center;
+}
+.patchChip:active{ cursor: grabbing; }
+
+.patchChipTop{
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: rgba(220,245,255,.96);
+    font-weight: 800;
+}
+.patchChipSub{
+    margin-top: 4px;
+    font-size: 11px;
+    color: rgba(190,205,235,.78);
+}
+
+/* ✅ 타겟을 그리드로 배치해서 PATCH랑 겹치지 않게 */
+.patchTargets{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+/* ✅ 타겟은 드롭 이벤트를 받아야 함 */
 .patchTarget{
-    position:absolute;
-    transform: translate(-50%, -50%);
-    width: min(280px, 42vw);
-    max-width: 320px;
-    min-width: 200px;
+    position: relative;        /* absolute ❌ */
+    transform: none;           /* translate ❌ */
+    width: 100%;
+    max-width: none;
+    min-width: 0;
     padding: 12px 12px 11px;
     border-radius: 16px;
     border: 1px solid rgba(108,231,255,.22);
     background: rgba(10,14,28,.68);
     box-shadow: 0 14px 30px rgba(0,0,0,.32);
-    pointer-events: none;
+    pointer-events: auto;      /* ✅ */
 }
+
+.patchTarget.active{
+    border-color: rgba(108,231,255,.45);
+    background: rgba(108,231,255,.08);
+}
+
 .patchTarget.danger{ border-color: rgba(255,107,107,.28); }
+
 .patchTargetK{
     font-size: 10px;
     letter-spacing: .14em;
@@ -182,38 +273,13 @@
     color: rgba(180,200,230,.70);
 }
 
-/* PATCH draggable */
-.patchChip{
-    position:absolute;
-    transform: translate(-50%, -50%);
-    width: 128px;
-    height: 62px;
-    border-radius: 16px;
-    border: 1px solid rgba(108,231,255,.40);
-    background: rgba(108,231,255,.10);
-    box-shadow: 0 18px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(108,231,255,.08);
-    cursor: grab;
-    user-select: none;
-    touch-action: none;
-    display:flex;
-    flex-direction: column;
-    justify-content:center;
-    align-items:center;
-}
-.patchChip:active{ cursor: grabbing; }
-.patchChipTop{
-    font-size: 12px;
-    letter-spacing: .18em;
-    color: rgba(220,245,255,.96);
-    font-weight: 800;
-}
-.patchChipSub{
-    margin-top: 4px;
-    font-size: 11px;
-    color: rgba(190,205,235,.78);
+@media (max-width: 520px){
+    .patchTargets{ grid-template-columns: 1fr; }
 }
 
-/* 2번 코드 박스 */
+/* =========================
+   2번 코드 박스
+   ========================= */
 .issueCodeBox{
     margin-top: 14px;
     border-radius: 18px;
@@ -290,7 +356,7 @@
     padding: 10px 0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     color: rgba(240,245,255,.95);
-    font-size: 16px; /* ✅ 더 크게 */
+    font-size: 16px;
     line-height: 1.7;
 }
 .codeLines.eraserOn .codeLine{ cursor: pointer; }
@@ -458,36 +524,6 @@
     .issueBig{ font-size: 22px; }
     .rfText{ font-size: 15px; }
     .codeLines{ font-size: 15px; }
-    .patchTarget{ min-width: 180px; }
-}
-
-.miniToast{
-    position: fixed;
-    left: 50%;
-    bottom: 110px;
-    transform: translateX(-50%);
-    z-index: 200;
-    pointer-events: none;
-}
-.miniToastInner{
-    padding: 12px 16px;
-    border-radius: 999px;
-    font-weight: 900;
-    letter-spacing: .08em;
-    border: 1px solid rgba(27,42,85,.65);
-    background: rgba(6,8,14,.55);
-    color: rgba(233,240,255,.92);
-    box-shadow: 0 18px 40px rgba(0,0,0,.45);
-}
-.miniToastInner.ok{
-    border-color: rgba(108,231,255,.38);
-    background: rgba(108,231,255,.12);
-    color: rgba(220,245,255,.96);
-}
-.miniToastInner.bad{
-    border-color: rgba(255,107,107,.38);
-    background: rgba(255,107,107,.10);
-    color: rgba(255,190,190,.96);
 }
 
 /* ===== 3) TYPE FALL ===== */
@@ -592,30 +628,18 @@
     border: 1px solid rgba(27,42,85,.55);
     background: rgba(6,8,14,.22);
     overflow:hidden;
+    position: relative;
+    touch-action: none;
 }
 .mazeCell{
     position: relative;
     border: 1px solid rgba(27,42,85,.35);
     background: rgba(10,14,28,.20);
 }
-.mazeCell.wall{
-    background: rgba(2,4,10,.55);
-}
-.mazeCell.zoneO{
-    background: rgba(108,231,255,.10);
-}
-.mazeCell.zoneX{
-    background: rgba(255,107,107,.08);
-}
-.mazePlayer{
-    position:absolute;
-    inset: 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color: rgba(240,245,255,.95);
-    font-weight: 900;
-}
+.mazeCell.wall{ background: rgba(2,4,10,.55); }
+.mazeCell.zoneO{ background: rgba(108,231,255,.10); }
+.mazeCell.zoneX{ background: rgba(255,107,107,.08); }
+
 .mazeToken{
     position:absolute;
     left: 50%;
@@ -630,209 +654,54 @@
     letter-spacing: .08em;
 }
 
-.mazeSide{
-    border-radius: 18px;
-    border: 1px solid rgba(27,42,85,.55);
-    background: rgba(6,8,14,.20);
-    padding: 12px;
-}
-.mazeSideTitle{
-    font-size: 12px;
-    letter-spacing: .14em;
-    color: rgba(190,205,235,.82);
-    margin-bottom: 8px;
-}
-.mazeList{
-    display:flex;
-    flex-direction:column;
-    gap: 8px;
-}
-.mazeStmt{
-    display:grid;
-    grid-template-columns: 44px 1fr 28px;
-    gap: 8px;
-    align-items:start;
-    padding: 10px 10px;
-    border-radius: 14px;
-    border: 1px solid rgba(27,42,85,.55);
-    background: rgba(0,0,0,.18);
-}
-.mazeStmt.done{
-    opacity: .85;
-}
-.mazeStmtId{
-    font-size: 12px;
-    letter-spacing: .12em;
-    color: rgba(220,245,255,.95);
-    font-weight: 900;
-}
-.mazeStmtText{
-    font-size: 12px;
-    line-height: 1.45;
-    color: rgba(233,240,255,.92);
-}
-.mazeStmtMark{
-    font-weight: 900;
-    text-align:center;
-    color: rgba(190,205,235,.82);
-}
-.mazeLegend{
-    margin-top: 10px;
-    display:flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    color: rgba(190,205,235,.82);
-    font-size: 12px;
-}
-.lgRow{ display:flex; align-items:center; gap: 6px; }
-.lgBox{
-    width: 12px; height: 12px; border-radius: 4px;
-    border: 1px solid rgba(27,42,85,.55);
-    background: rgba(6,8,14,.22);
-}
-.lgBox.o{ background: rgba(108,231,255,.18); border-color: rgba(108,231,255,.28); }
-.lgBox.x{ background: rgba(255,107,107,.14); border-color: rgba(255,107,107,.28); }
-
-@media (max-width: 860px){
-    .mazeBoard{ grid-template-columns: 1fr; }
-}
-
-
-.issuePageRoot{
-    position: relative;
-    min-height: 100vh;
-}
-
-/* type_fall START 버튼 */
-.typeFallStart{
-    position:absolute;
-    left:50%;
-    top:42%;
-    transform:translate(-50%,-50%);
-    padding:12px 18px;
-    border-radius:14px;
-    border:1px solid rgba(108,231,255,.35);
-    background: rgba(108,231,255,.10);
-    color: rgba(240,245,255,.95);
-    font-weight: 700;
-    letter-spacing: .14em;
-}
-.typeFallStart:hover{
+/* ✅ 플레이어 원 */
+.mazePlayerDot{
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(108,231,255,.45);
     background: rgba(108,231,255,.18);
+    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    pointer-events: none;
+    z-index: 5;
 }
 
-
-/* ===== 5) RPS TRADE-OFF ===== */
-.rpsWrap{
-    margin-top: 16px;
-    border-radius: 18px;
-    border: 1px solid rgba(27,42,85,.55);
-    background: rgba(6,8,14,.22);
-    padding: 14px;
+/* ✅ D-pad */
+.mazePad{
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+    width: 140px;
 }
-.rpsTop{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap: 12px;
-    margin-bottom: 12px;
+.mazePadRow{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
 }
-.rpsEnemy{
-    flex: 1 1 auto;
-    border-radius: 16px;
-    border: 1px solid rgba(108,231,255,.18);
-    background: radial-gradient(120% 120% at 20% 10%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%), rgba(0,0,0,.16);
-    padding: 12px 12px;
-}
-.rpsTag{
-    font-size: 11px;
-    letter-spacing: .14em;
-    font-weight: 900;
-    color: rgba(220,245,255,.95);
-}
-.rpsLine{
-    margin-top: 6px;
-    font-size: 13px;
-    line-height: 1.5;
+.mazePadBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
     color: rgba(233,240,255,.92);
-}
-.rpsHint{
-    flex: 0 0 auto;
-    font-size: 12px;
-    color: rgba(190,205,235,.82);
-    padding-top: 6px;
+    border-radius: 10px;
+    height: 36px;
+    cursor: pointer;
 }
 
+/* ===== 5) RPS ===== */
 .rpsGrid{
     display:grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
-.rpsCard{
-    -webkit-appearance:none;
-    appearance:none;
-    border: 1px solid rgba(108,231,255,.18);
-    background: rgba(10,14,28,.62);
-    border-radius: 18px;
-    padding: 14px 12px 12px;
-    cursor: pointer;
-    text-align: left;
-    box-shadow: 0 16px 34px rgba(0,0,0,.35);
-    transition: transform .08s ease, background .12s ease, border-color .12s ease;
-    color: rgba(240,245,255,.96);
-}
-.rpsCard:hover{
-    border-color: rgba(108,231,255,.32);
-    background: rgba(108,231,255,.06);
-    transform: translateY(-1px);
-}
-.rpsCard:active{
-    transform: translateY(0);
-}
-.rpsIcon{
-    font-size: 22px;
-    line-height: 1;
-}
-.rpsHand{
-    margin-top: 8px;
-    font-size: 11px;
-    letter-spacing: .16em;
-    font-weight: 900;
-    color: rgba(190,205,235,.86);
-}
-.rpsOpt{
-    margin-top: 8px;
-    font-size: 13px;
-    line-height: 1.45;
-    font-weight: 800;
-    color: rgba(240,245,255,.96);
-}
-.rpsSub{
-    margin-top: 10px;
-    font-size: 11px;
-    color: rgba(170,186,220,.72);
-}
-.rpsEnemyHand{
-    margin-top: 12px;
-    font-size: 12px;
-    color: rgba(190,205,235,.82);
-}
-.rpsEnemyHand b{
-    color: rgba(240,245,255,.96);
-}
-
 @media (max-width: 720px){
-    .rpsTop{ flex-direction: column; }
     .rpsGrid{ grid-template-columns: 1fr; }
 }
 
-.rhWrap{
-    margin-top: 16px;
-    border-radius: 18px;
-    border: 1px solid rgba(27,42,85,.55);
-    background: rgba(6,8,14,.22);
-    padding: 14px;
-}
+/* ===== 6) RHYTHM ===== */
 .rhTop{
     display:flex;
     align-items:center;
@@ -840,12 +709,6 @@
     gap: 10px;
     flex-wrap: wrap;
     margin-bottom: 10px;
-}
-.rhTitle{
-    font-size: 12px;
-    letter-spacing: .16em;
-    font-weight: 900;
-    color: rgba(220,245,255,.95);
 }
 .rhMeta{
     display:flex;
@@ -866,77 +729,12 @@
 }
 .rhBarFill{
     height: 100%;
-    width: 0%;
+    width: 0;
     background: linear-gradient(90deg, rgba(108,231,255,.0), rgba(108,231,255,.22), rgba(108,231,255,.0));
     transition: width .06s linear;
 }
-
 .rhLaneRow{
     display:grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
-.rhLaneBtn{
-    -webkit-appearance:none;
-    appearance:none;
-    border: 1px solid rgba(108,231,255,.18);
-    background: rgba(10,14,28,.62);
-    border-radius: 18px;
-    padding: 14px 12px 12px;
-    cursor: pointer;
-    text-align: left;
-    box-shadow: 0 16px 34px rgba(0,0,0,.35);
-    transition: transform .08s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
-    color: rgba(240,245,255,.96);
-}
-.rhLaneBtn:hover{
-    border-color: rgba(108,231,255,.32);
-    background: rgba(108,231,255,.06);
-    transform: translateY(-1px);
-}
-.rhLaneBtn:active{
-    transform: translateY(0);
-}
-.rhLaneBtn:disabled{
-    cursor: not-allowed;
-    opacity: .55;
-}
-.rhLaneK{
-    width: 26px;
-    height: 26px;
-    border-radius: 10px;
-    border: 1px solid rgba(108,231,255,.28);
-    background: rgba(108,231,255,.10);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight: 900;
-    color: rgba(220,245,255,.95);
-}
-.rhLaneT{
-    margin-top: 10px;
-    font-size: 14px;
-    font-weight: 900;
-    color: rgba(240,245,255,.96);
-}
-.rhLaneS{
-    margin-top: 6px;
-    font-size: 12px;
-    line-height: 1.45;
-    color: rgba(190,205,235,.82);
-}
-.rhNext{
-    margin-top: 12px;
-    font-size: 12px;
-    color: rgba(190,205,235,.82);
-    text-align: right;
-}
-
-@media (max-width: 720px){
-    .rhLaneRow{ grid-template-columns: 1fr; }
-    .rhMeta{ justify-content:flex-start; }
-}
-
-
-
-
