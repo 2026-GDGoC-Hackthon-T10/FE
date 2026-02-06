@@ -1,0 +1,312 @@
+/* 기본 배경 및 스크롤 제거 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* 기본 배경 설정 */
+.home-wrapper {
+  height: 100vh;
+  width: 100vw;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1;
+}
+
+/* 상단 네비게이션 (고정) */
+.navbar {
+  height: 80px;
+  width: 100%;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 62px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-left { display: flex; align-items: center; gap: 40px; }
+.brand-logo {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #0d0c22;
+  letter-spacing: -1px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.brand-logo:hover {
+  opacity: 0.78;
+}
+.brand-logo span {
+  color: #3b82f6;
+}
+.nav-menu { display: flex; list-style: none; gap: 25px; margin: 0; padding: 0; }
+.nav-menu li { font-size: 0.95rem; font-weight: 600; color: #6e6d7a; cursor: not-allowed; }
+.nav-menu li.active { color: #0d0c22; }
+
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.btn-login-text { background: none; border: none; font-weight: 600; color: #6e6d7a; cursor: not-allowed; }
+.btn-start-free { background: #e2e8f0; 
+  color: #94a3b8; 
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: not-allowed; }
+
+/* 유리 효과 카드 공통 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 28px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  z-index: 2;
+  position: relative;
+}
+
+/* 메인 그리드 레이아웃 */
+.grid-container {
+  flex: 1; 
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 116px 20px 4vh; 
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+/* 왼쪽 큰 영역 */
+.main-feature {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;     
+  padding: 0 50px;         
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 28px;
+  overflow: hidden;        
+  position: relative;
+}
+
+/* 오른쪽 카드 묶음 */
+.side-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; 
+  height: 100%;
+}
+
+.side-cards .job-item {
+  flex: 1; 
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 작은 카드의 텍스트 크기 조절 */
+.side-cards h4 {
+  font-size: clamp(1rem, 2.2vh, 1.3rem);
+  margin-bottom: 0.5vh;
+}
+
+.side-cards p {
+  font-size: clamp(0.7rem, 1.8vh, 0.9rem);
+}
+
+.highlight-card { border: 2px solid #3b82f6 !important; }
+
+/* 상세 요소 스타일 */
+.hero-content {
+  width: 100%;
+  max-width: 600px;        
+  text-align: left;        
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0; 
+}
+.hero-title {
+  font-size: clamp(2rem, 5vh, 2.8rem);
+  line-height: 1.2;
+  margin-top: 0;         
+  margin-bottom: 2vh;
+  color: #111;
+}
+.hero-title span { color: #3b82f6; }
+.hero-sub { font-size: 1.2rem; color: #444; margin-bottom: 40px; line-height: 1.6; }
+
+.search-bar {
+  display: flex;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 12px 6px 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-top: 15px;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1d1d1f; 
+  background: transparent;
+}
+.search-bar input::placeholder {
+  color: #86868b; 
+}
+.search-btn {
+  background: transparent; 
+  border: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.search-btn:hover {
+  opacity: 0.6;
+  transform: scale(1.05);
+}
+
+.search-btn:active {
+  transform: scale(0.95);
+}
+
+.card-tag { display: inline-block; padding: 4px 10px; background: #fee2e2; color: #ef4444; border-radius: 8px; font-size: 0.75rem; font-weight: 800; margin-bottom: 12px; width: fit-content; }
+.card-tag.grey { background: #f1f5f9; color: #64748b; }
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+}
+.error-box { background: #111; color: #fff; padding: 60px; border-radius: 32px; border: 1px solid #ff4d4d; text-align: center; max-width: 450px; }
+.start-btn { margin-top: 30px; padding: 18px 45px; background: #ff4d4d; color: #fff; border: none; border-radius: 14px; font-weight: 800; font-size: 1.1rem; cursor: pointer; }
+
+/* 사이드 카드 헤더 정렬 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.company-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* 카드 바디 텍스트 */
+.side-cards .card-body h4 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.side-cards .card-body p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+/* 지원서 제출하기 버튼 */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(234, 76, 137, 0.2);
+}
+
+.submit-btn:hover {
+  background: #316ecf;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(234, 76, 137, 0.3);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.highlight-card {
+  border: 1px solid rgba(234, 76, 137, 0.3) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 애니메이션 핵심 정의 (Keyframes) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-feature {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.side-cards .job-item:nth-child(1) {
+  animation: fadeInUp 0.8s ease-out 0.2s forwards; 
+  opacity: 0;
+}
+
+.side-cards .job-item:nth-child(2) {
+  animation: fadeInUp 0.8s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.grid-container {
+  overflow: visible;
+}
+
