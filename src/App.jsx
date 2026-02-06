@@ -1,13 +1,13 @@
-import { useState } from 'react'
+// App.jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/Home/HomePage.jsx";
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <h1>test</h1>
-    </>
-  )
+export default function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
-
-export default App
