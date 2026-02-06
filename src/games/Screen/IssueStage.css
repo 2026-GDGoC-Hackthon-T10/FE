@@ -1,0 +1,189 @@
+.issueStage{
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 12px 110px;
+    color: #e9efff;
+}
+
+.stageCard{
+    background: rgba(10, 12, 18, 0.72);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+
+.stageTitle{
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+}
+
+.stageMono{
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(233,239,255,0.92);
+    min-height: 72px;
+}
+
+.stageHint{
+    color: rgba(233,239,255,0.75);
+    padding: 10px 0;
+}
+
+.stageError{
+    color: rgba(255,190,190,0.95);
+    line-height: 1.5;
+}
+
+.stageQuestion{
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    margin: 6px 0 14px;
+}
+
+.stageOptions{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0 14px;
+}
+
+.optBtn{
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    color: rgba(233,239,255,0.95);
+    cursor: pointer;
+    text-align: left;
+}
+
+.optBtn:hover{
+    background: rgba(255,255,255,0.06);
+}
+
+.optBtn.active{
+    border-color: rgba(108,231,255,0.55);
+    background: rgba(108,231,255,0.08);
+}
+
+.optIdx{
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    background: rgba(255,255,255,0.08);
+    flex: 0 0 auto;
+}
+
+.optText{
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    flex: 1 1 auto;
+}
+
+.stageActions{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btnPrimary{
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(108,231,255,0.45);
+    background: rgba(108,231,255,0.14);
+    color: rgba(233,239,255,0.98);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.btnPrimary:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnGhost{
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: rgba(233,239,255,0.92);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.stageResult{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.resultBadge{
+    width: fit-content;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+.resultBadge.ok{
+    border-color: rgba(140,255,190,0.35);
+    background: rgba(140,255,190,0.12);
+}
+
+.resultBadge.bad{
+    border-color: rgba(255,140,140,0.35);
+    background: rgba(255,140,140,0.10);
+}
+
+.resultHint{
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+}
+
+.resultLabel{
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 6px;
+}
+
+.resultValue{
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.resultExplain{
+    color: rgba(233,239,255,0.82);
+    line-height: 1.55;
+}
+
+.stageMeta{
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    color: rgba(233,239,255,0.55);
+    font-size: 12px;
+}
+
+.stageMeta .dot{
+    opacity: 0.5;
+}

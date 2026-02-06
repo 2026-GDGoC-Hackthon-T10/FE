@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import "./MainPage.css";
 import { useNavigate } from "react-router-dom";
 
-
 const ACTIONS = [
-    { key: "scan", label: "취약점 점검" },
-    { key: "block", label: "오류 차단" },
-    { key: "restore", label: "기록 복구" },
+    { key: "scan", label: "취약점 점검", groupId: "g1" },
+    { key: "restore", label: "기록 복구", groupId: "g2" },
+    { key: "block", label: "오류 차단", groupId: "g3" },
 ];
 
 const ERROR_FRAGMENTS = [
@@ -24,17 +23,21 @@ const ERROR_FRAGMENTS = [
     "CHECKSUM_ERR",
 ];
 
-const LINES = [
-    "이게 무슨 일이지?",
-    "내가 서버를 복구해야 된다고…",
-    "우선 오류를 확인해보자.",
-];
+const LINES = ["이게 무슨 일이지?", "내가 서버를 복구해야 된다고…", "우선 오류를 확인해보자."];
 
 function cls(...xs) {
     return xs.filter(Boolean).join(" ");
 }
 function rand(min, max) {
     return Math.random() * (max - min) + min;
+}
+
+function readProgress() {
+    try {
+        return JSON.parse(sessionStorage.getItem("gameProgress") || "{}");
+    } catch {
+        return {};
+    }
 }
 
 export default function MainPage() {
@@ -52,6 +55,20 @@ export default function MainPage() {
 
     const [lineIdx, setLineIdx] = useState(0);
     const [bbBump, setBbBump] = useState(false);
+
+    // ✅ 완료/진행 상태
+    const [progress, setProgress] = useState(() => readProgress());
+
+    // ✅ /games로 돌아올 때(또는 새로고침) 상태 재동기화
+    useEffect(() => {
+        const sync = () => setProgress(readProgress());
+        window.addEventListener("focus", sync);
+        window.addEventListener("storage", sync);
+        return () => {
+            window.removeEventListener("focus", sync);
+            window.removeEventListener("storage", sync);
+        };
+    }, []);
 
     useEffect(() => {
         const t = setTimeout(() => setPhase("live"), 1350);
@@ -72,14 +89,12 @@ export default function MainPage() {
 
         const spawn = () => {
             const id = idRef.current++;
-            const kind =
-                Math.random() < 0.55 ? "toast" : Math.random() < 0.7 ? "stamp" : "line";
+            const kind = Math.random() < 0.55 ? "toast" : Math.random() < 0.7 ? "stamp" : "line";
             const x = rand(6, 94);
             const y = kind === "line" ? rand(14, 78) : rand(12, 82);
             const ttl = rand(900, 2400);
 
-            const text =
-                ERROR_FRAGMENTS[Math.floor(Math.random() * ERROR_FRAGMENTS.length)];
+            const text = ERROR_FRAGMENTS[Math.floor(Math.random() * ERROR_FRAGMENTS.length)];
 
             const frag = {
                 id,
@@ -123,21 +138,22 @@ export default function MainPage() {
         setModalOpen(false);
         setFocusFrag(null);
     }
-    function chooseAction(key) {
-        setSelected(key);
-        setModalOpen(false);
 
-        if (key === "scan") {
-            navigate("/games/issue/g1");
-        }
-        else if (key === "restore") {
-            navigate("/games/issue/g2");
-        }
-        else if (key === "block") {
-            navigate("/games/issue/g3");
-        }
+    function isSolved(groupId) {
+        return !!progress?.[groupId]?.done;
     }
 
+    function chooseAction(key) {
+        const action = ACTIONS.find((a) => a.key === key);
+        if (!action) return;
+
+        // ✅ 해결된 액션이면 막기
+        if (isSolved(action.groupId)) return;
+
+        setSelected(key);
+        setModalOpen(false);
+        navigate(`/games/issue/${action.groupId}`);
+    }
 
     useEffect(() => {
         function onKeyDown(e) {
@@ -163,7 +179,6 @@ export default function MainPage() {
             return;
         }
 
-        // ✅ 3/3 이후: 버튼/모달 등 상호작용은 그대로 두고, 빈 화면만 대사 진행
         if (e.target.closest("button, a, input, textarea, .modal, .modalOverlay")) return;
 
         setLineIdx((i) => Math.min(i + 1, LINES.length - 1));
@@ -171,12 +186,8 @@ export default function MainPage() {
         setTimeout(() => setBbBump(false), 220);
     }
 
-
     return (
-        <div
-            className={cls("page", glitch && "glitch")}
-            onMouseDown={advanceDialogueFromClick}
-        >
+        <div className={cls("page", glitch && "glitch")} onMouseDown={advanceDialogueFromClick}>
             <div className="bgScanlines" />
             <div className="bgNoise" />
             <div className="bgGlowA" />
@@ -255,40 +266,33 @@ export default function MainPage() {
                         </div>
                     </div>
                 ) : (
-                    <>
-                        <div className="statusBanner">
-                            <div className="statusTitle">
-                                <span className="dotPulse" />
-                                서버 상태: <b>매우 위험</b>
-                            </div>
-                            <div className="statusSub">지직거림 감지 · 데이터 무결성 저하</div>
-                            <div className="statusMeter">
-                                <div className="meterFill" />
-                            </div>
+                    <div className="statusBanner">
+                        <div className="statusTitle">
+                            <span className="dotPulse" />
+                            서버 상태: <b>매우 위험</b>
                         </div>
-
-                    </>
+                        <div className="statusSub">지직거림 감지 · 데이터 무결성 저하</div>
+                        <div className="statusMeter">
+                            <div className="meterFill" />
+                        </div>
+                    </div>
                 )}
             </div>
 
             {phase === "live" && (
-                <div
-                    className={cls("bottomBubble", bbBump && "bump")}
-                    role="status"
-                    aria-live="polite"
-                    data-step={`${lineIdx + 1}/${LINES.length}`}
-                >
+                <div className={cls("bottomBubble", bbBump && "bump")} role="status" aria-live="polite" data-step={`${lineIdx + 1}/${LINES.length}`}>
                     <div className="bbAvatar">YOU</div>
-
                     <div className="bbTextWrap">
-                        <div className="bbText" key={lineIdx}>{LINES[lineIdx]}</div>
-                        <div className="bbStep">{lineIdx + 1} / {LINES.length}</div>
+                        <div className="bbText" key={lineIdx}>
+                            {LINES[lineIdx]}
+                        </div>
+                        <div className="bbStep">
+                            {lineIdx + 1} / {LINES.length}
+                        </div>
                     </div>
-
                     <div className="bbFlash" aria-hidden="true" />
                 </div>
             )}
-
 
             {modalOpen && (
                 <div className="modalOverlay" onMouseDown={closeModal}>
@@ -296,26 +300,32 @@ export default function MainPage() {
                         <div className="modalHead">
                             <div className="modalTitleRow">
                                 <div className="warnTitle">⚠ 제출 서버 불안정</div>
-                                <button className="modalClose" onClick={closeModal} aria-label="close">
+                                <button className="modalClose" onClick={closeModal} aria-label="close" type="button">
                                     ×
                                 </button>
                             </div>
-                            <div className="modalDesc">
-                                {focusFrag ? `${focusFrag.text} · ${focusFrag.sub}` : "signal unstable"}
-                            </div>
+                            <div className="modalDesc">{focusFrag ? `${focusFrag.text} · ${focusFrag.sub}` : "signal unstable"}</div>
                         </div>
 
                         <div className="modalBody">
                             <div className="modalActions3">
-                                {ACTIONS.map((a) => (
-                                    <button
-                                        key={a.key}
-                                        className={cls("actionPrimary", selected === a.key && "active")}
-                                        onClick={() => chooseAction(a.key)}
-                                    >
-                                        {a.label}
-                                    </button>
-                                ))}
+                                {ACTIONS.map((a) => {
+                                    const done = isSolved(a.groupId);
+                                    return (
+                                        <button
+                                            key={a.key}
+                                            type="button"
+                                            className={cls("actionPrimary", selected === a.key && "active", done && "disabled")}
+                                            onClick={() => chooseAction(a.key)}
+                                            disabled={done}
+                                            aria-disabled={done}
+                                            title={done ? "해결됨" : ""}
+                                        >
+                                            <span>{a.label}</span>
+                                            {done && <span className="actionDone">해결</span>}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

@@ -375,6 +375,21 @@
 }
 .modalClose:hover{ opacity: 1; }
 
+.actionPrimary.disabled{
+    opacity:.45;
+    cursor:not-allowed;
+    filter:grayscale(1);
+}
+.actionDone{
+    margin-left:10px;
+    font-size:12px;
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.25);
+    opacity:.9;
+}
+
+
 
 
 
