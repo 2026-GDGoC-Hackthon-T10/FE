@@ -1,0 +1,942 @@
+/* games/Screen/IssuePage.css */
+
+.issuePage{
+    min-height: 100vh;
+    position: relative;
+    padding: 18px 0 160px;
+    overflow: hidden;
+}
+
+.issueWrap{
+    width: min(980px, calc(100% - 24px));
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+}
+
+.issueCard{
+    border-radius: 22px;
+    border: 1px solid rgba(108,231,255,.18);
+    background: linear-gradient(180deg, rgba(10,14,28,.72), rgba(6,10,22,.66));
+    box-shadow: 0 26px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
+    padding: 22px 22px 170px;
+}
+
+.issueTopBar{
+    width: min(980px, calc(100% - 24px));
+    margin: 0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 5;
+}
+
+.issueBack{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(233,240,255,.92);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.issueTopMeta{ display:flex; align-items:center; gap: 10px; }
+.issueTopChip{
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(108,231,255,.28);
+    background: rgba(108,231,255,.08);
+    color: rgba(200,240,255,.95);
+    font-size: 12px;
+    letter-spacing: .08em;
+}
+.issueTopStat{
+    color: rgba(190,205,235,.85);
+    font-size: 12px;
+    letter-spacing: .02em;
+}
+
+.issueMini{
+    font-size: 12px;
+    color: rgba(180,200,230,.72);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.issueBig{
+    margin-top: 8px;
+    font-size: 28px;
+    font-weight: 800;
+    color: rgba(240,245,255,.96);
+}
+.issueHint{
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(190,205,235,.82);
+    line-height: 1.55;
+}
+
+/* ✅ 1번 전용: 리뷰 포인트 박스 (1~2줄 크게) */
+.reviewFocusBox{
+    margin-top: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(108,231,255,.22);
+    background:
+            radial-gradient(120% 120% at 20% 10%, rgba(108,231,255,.12), rgba(108,231,255,0) 55%),
+            rgba(6,8,14,.28);
+    overflow: hidden;
+}
+.reviewFocusHead{
+    padding: 12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.32);
+}
+.reviewFocusTag{
+    font-size: 11px;
+    letter-spacing: .16em;
+    color: rgba(220,245,255,.95);
+    font-weight: 900;
+}
+.reviewFocusHint{
+    font-size: 12px;
+    color: rgba(170,186,220,.82);
+}
+.reviewFocusLines{
+    padding: 14px 14px 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.reviewFocusLine{
+    display:flex;
+    align-items:flex-start;
+    gap: 12px;
+    padding: 10px 10px;
+    border-radius: 14px;
+    background: rgba(0,0,0,.18);
+    border: 1px solid rgba(27,42,85,.55);
+}
+.reviewFocusLine + .reviewFocusLine{ margin-top: 10px; }
+.rfNo{
+    width: 34px;
+    text-align:right;
+    color: rgba(170,186,220,.70);
+    user-select:none;
+    font-size: 14px;
+}
+.rfText{
+    color: rgba(240,245,255,.96);
+    font-size: 16px;
+    line-height: 1.45;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.issueBoard{
+    margin-top: 16px;
+    position: relative;
+    height: 240px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background:
+            radial-gradient(120% 100% at 20% 15%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%),
+            rgba(6,8,14,.28);
+    overflow: hidden;
+}
+
+/* targets */
+.patchTarget{
+    position:absolute;
+    transform: translate(-50%, -50%);
+    width: min(280px, 42vw);
+    max-width: 320px;
+    min-width: 200px;
+    padding: 12px 12px 11px;
+    border-radius: 16px;
+    border: 1px solid rgba(108,231,255,.22);
+    background: rgba(10,14,28,.68);
+    box-shadow: 0 14px 30px rgba(0,0,0,.32);
+    pointer-events: none;
+}
+.patchTarget.danger{ border-color: rgba(255,107,107,.28); }
+.patchTargetK{
+    font-size: 10px;
+    letter-spacing: .14em;
+    color: rgba(180,200,230,.70);
+}
+.patchTargetT{
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(240,245,255,.95);
+}
+.patchTargetS{
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(180,200,230,.70);
+}
+
+/* PATCH draggable */
+.patchChip{
+    position:absolute;
+    transform: translate(-50%, -50%);
+    width: 128px;
+    height: 62px;
+    border-radius: 16px;
+    border: 1px solid rgba(108,231,255,.40);
+    background: rgba(108,231,255,.10);
+    box-shadow: 0 18px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(108,231,255,.08);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    display:flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items:center;
+}
+.patchChip:active{ cursor: grabbing; }
+.patchChipTop{
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: rgba(220,245,255,.96);
+    font-weight: 800;
+}
+.patchChipSub{
+    margin-top: 4px;
+    font-size: 11px;
+    color: rgba(190,205,235,.78);
+}
+
+/* 2번 코드 박스 */
+.issueCodeBox{
+    margin-top: 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.28);
+    overflow: hidden;
+}
+.codeHead{
+    padding: 12px 14px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.32);
+}
+.codeFile{
+    color: rgba(233,240,255,.92);
+    font-size: 12px;
+    letter-spacing: .08em;
+}
+.codeNote{
+    color: rgba(170,186,220,.82);
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: right;
+}
+
+/* ERASE TOOLBAR */
+.eraseToolbar{
+    margin-top: 16px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.toolBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(233,240,255,.92);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font: inherit;
+}
+.toolBtn.active{
+    border-color: rgba(108,231,255,.38);
+    background: rgba(108,231,255,.10);
+    box-shadow: 0 0 0 1px rgba(108,231,255,.10);
+}
+.toolHint{
+    margin-left: 4px;
+    color: rgba(190,205,235,.82);
+    font-size: 12px;
+    flex: 1 1 auto;
+}
+.submitBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(108,231,255,.38);
+    background: rgba(108,231,255,.10);
+    color: rgba(220,245,255,.96);
+    border-radius: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+/* CODE LINES */
+.codeLines{
+    padding: 10px 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: rgba(240,245,255,.95);
+    font-size: 16px; /* ✅ 더 크게 */
+    line-height: 1.7;
+}
+.codeLines.eraserOn .codeLine{ cursor: pointer; }
+
+.codeLine{
+    position: relative;
+    display:flex;
+    align-items:flex-start;
+    gap: 12px;
+    padding: 7px 14px;
+}
+.codeLine:hover{ background: rgba(108,231,255,.04); }
+
+.lnNo{
+    width: 34px;
+    text-align: right;
+    color: rgba(170,186,220,.70);
+    user-select: none;
+}
+.lnText{
+    white-space: pre;
+    overflow-x: auto;
+    padding-right: 16px;
+    flex: 1 1 auto;
+}
+.codeLine.erased .lnText{ opacity: .55; }
+
+.lnStrike{
+    position:absolute;
+    left: 60px;
+    right: 18px;
+    top: 50%;
+    height: 14px;
+    transform: translateY(-50%) rotate(-2deg);
+    border-radius: 12px;
+    background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0),
+            rgba(255,107,107,.22),
+            rgba(255,107,107,.30),
+            rgba(255,255,255,0)
+    );
+    opacity: 0;
+    pointer-events:none;
+}
+.codeLine.erased .lnStrike{ opacity: 1; }
+
+/* DONE */
+.doneBox{
+    margin-top: 18px;
+    padding: 18px 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.25);
+}
+.doneTitle{
+    font-size: 18px;
+    font-weight: 800;
+    color: rgba(240,245,255,.96);
+}
+.doneSub{
+    margin-top: 6px;
+    font-size: 13px;
+    color: rgba(190,205,235,.82);
+}
+.doneActions{
+    margin-top: 12px;
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* BUTTONS */
+.issueBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(108,231,255,.38);
+    background: rgba(108,231,255,.10);
+    color: rgba(220,245,255,.96);
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+}
+.issueBtn.ghost{
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(233,240,255,.92);
+}
+
+/* RESULT */
+.resultOverlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(5,8,18,.72);
+    backdrop-filter: blur(6px);
+    z-index: 120;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 18px;
+}
+.resultModal{
+    width: min(520px, calc(100% - 24px));
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(12,18,38,.96), rgba(6,10,22,.94));
+    border: 1px solid rgba(108,231,255,.22);
+    box-shadow: 0 40px 90px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,255,255,.03);
+    padding: 22px 22px 20px;
+}
+.resultBadge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: .14em;
+    font-weight: 900;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(233,240,255,.92);
+}
+.resultBadge.ok{
+    border-color: rgba(108,231,255,.35);
+    background: rgba(108,231,255,.10);
+    color: rgba(220,245,255,.96);
+}
+.resultBadge.bad{
+    border-color: rgba(255,107,107,.35);
+    background: rgba(255,107,107,.08);
+    color: rgba(255,170,170,.96);
+}
+.resultTitle{
+    margin-top: 12px;
+    font-size: 20px;
+    font-weight: 900;
+    color: rgba(240,245,255,.96);
+}
+.resultMsg{
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(190,205,235,.86);
+}
+.resultDetail{
+    margin-top: 10px;
+    padding: 12px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.24);
+    color: rgba(210,224,255,.90);
+    font-size: 13px;
+    line-height: 1.55;
+}
+.resultActions{
+    margin-top: 14px;
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 520px){
+    .issueBig{ font-size: 22px; }
+    .rfText{ font-size: 15px; }
+    .codeLines{ font-size: 15px; }
+    .patchTarget{ min-width: 180px; }
+}
+
+.miniToast{
+    position: fixed;
+    left: 50%;
+    bottom: 110px;
+    transform: translateX(-50%);
+    z-index: 200;
+    pointer-events: none;
+}
+.miniToastInner{
+    padding: 12px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.55);
+    color: rgba(233,240,255,.92);
+    box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+.miniToastInner.ok{
+    border-color: rgba(108,231,255,.38);
+    background: rgba(108,231,255,.12);
+    color: rgba(220,245,255,.96);
+}
+.miniToastInner.bad{
+    border-color: rgba(255,107,107,.38);
+    background: rgba(255,107,107,.10);
+    color: rgba(255,190,190,.96);
+}
+
+/* ===== 3) TYPE FALL ===== */
+.typeFallWrap{
+    margin-top: 16px;
+}
+.typeFallLane{
+    position: relative;
+    height: 240px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: radial-gradient(120% 100% at 20% 15%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%), rgba(6,8,14,.28);
+    overflow: hidden;
+}
+.typeFallHint{
+    position:absolute;
+    left: 14px;
+    top: 12px;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+}
+.typeFallDrop{
+    position:absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: top 0.02s linear;
+}
+.typeFallCode{
+    display:inline-block;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(108,231,255,.28);
+    background: rgba(10,14,28,.68);
+    color: rgba(240,245,255,.96);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: .02em;
+    box-shadow: 0 14px 30px rgba(0,0,0,.32);
+}
+.typeFallFloor{
+    position:absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 16px;
+    background: linear-gradient(90deg, rgba(108,231,255,.0), rgba(108,231,255,.12), rgba(108,231,255,0));
+    opacity: .55;
+}
+.typeFallInputRow{
+    margin-top: 12px;
+    display:flex;
+    gap: 10px;
+}
+.typeFallInput{
+    flex: 1 1 auto;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(27,42,85,.65);
+    background: rgba(6,8,14,.28);
+    color: rgba(240,245,255,.95);
+    padding: 0 14px;
+    outline: none;
+    font-size: 14px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+.typeFallInput::placeholder{ color: rgba(170,186,220,.55); }
+.typeFallSubmit{
+    -webkit-appearance:none;
+    appearance:none;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(108,231,255,.38);
+    background: rgba(108,231,255,.10);
+    color: rgba(220,245,255,.96);
+    font-weight: 800;
+    cursor:pointer;
+}
+
+/* ===== 4) MAZE OX ===== */
+.mazeWrap{ margin-top: 16px; }
+.mazeTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.mazeInfo{
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+}
+.mazeBoard{
+    display:grid;
+    grid-template-columns: 1.3fr .9fr;
+    gap: 12px;
+}
+.mazeGrid{
+    width: 100%;
+    aspect-ratio: 15/11;
+    display:grid;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+    overflow:hidden;
+}
+.mazeCell{
+    position: relative;
+    border: 1px solid rgba(27,42,85,.35);
+    background: rgba(10,14,28,.20);
+}
+.mazeCell.wall{
+    background: rgba(2,4,10,.55);
+}
+.mazeCell.zoneO{
+    background: rgba(108,231,255,.10);
+}
+.mazeCell.zoneX{
+    background: rgba(255,107,107,.08);
+}
+.mazePlayer{
+    position:absolute;
+    inset: 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(240,245,255,.95);
+    font-weight: 900;
+}
+.mazeToken{
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(108,231,255,.28);
+    background: rgba(10,14,28,.75);
+    color: rgba(240,245,255,.95);
+    font-size: 11px;
+    letter-spacing: .08em;
+}
+
+.mazeSide{
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.20);
+    padding: 12px;
+}
+.mazeSideTitle{
+    font-size: 12px;
+    letter-spacing: .14em;
+    color: rgba(190,205,235,.82);
+    margin-bottom: 8px;
+}
+.mazeList{
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+}
+.mazeStmt{
+    display:grid;
+    grid-template-columns: 44px 1fr 28px;
+    gap: 8px;
+    align-items:start;
+    padding: 10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(0,0,0,.18);
+}
+.mazeStmt.done{
+    opacity: .85;
+}
+.mazeStmtId{
+    font-size: 12px;
+    letter-spacing: .12em;
+    color: rgba(220,245,255,.95);
+    font-weight: 900;
+}
+.mazeStmtText{
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(233,240,255,.92);
+}
+.mazeStmtMark{
+    font-weight: 900;
+    text-align:center;
+    color: rgba(190,205,235,.82);
+}
+.mazeLegend{
+    margin-top: 10px;
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: rgba(190,205,235,.82);
+    font-size: 12px;
+}
+.lgRow{ display:flex; align-items:center; gap: 6px; }
+.lgBox{
+    width: 12px; height: 12px; border-radius: 4px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+}
+.lgBox.o{ background: rgba(108,231,255,.18); border-color: rgba(108,231,255,.28); }
+.lgBox.x{ background: rgba(255,107,107,.14); border-color: rgba(255,107,107,.28); }
+
+@media (max-width: 860px){
+    .mazeBoard{ grid-template-columns: 1fr; }
+}
+
+
+.issuePageRoot{
+    position: relative;
+    min-height: 100vh;
+}
+
+/* type_fall START 버튼 */
+.typeFallStart{
+    position:absolute;
+    left:50%;
+    top:42%;
+    transform:translate(-50%,-50%);
+    padding:12px 18px;
+    border-radius:14px;
+    border:1px solid rgba(108,231,255,.35);
+    background: rgba(108,231,255,.10);
+    color: rgba(240,245,255,.95);
+    font-weight: 700;
+    letter-spacing: .14em;
+}
+.typeFallStart:hover{
+    background: rgba(108,231,255,.18);
+}
+
+
+/* ===== 5) RPS TRADE-OFF ===== */
+.rpsWrap{
+    margin-top: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+    padding: 14px;
+}
+.rpsTop{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.rpsEnemy{
+    flex: 1 1 auto;
+    border-radius: 16px;
+    border: 1px solid rgba(108,231,255,.18);
+    background: radial-gradient(120% 120% at 20% 10%, rgba(108,231,255,.10), rgba(108,231,255,0) 55%), rgba(0,0,0,.16);
+    padding: 12px 12px;
+}
+.rpsTag{
+    font-size: 11px;
+    letter-spacing: .14em;
+    font-weight: 900;
+    color: rgba(220,245,255,.95);
+}
+.rpsLine{
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(233,240,255,.92);
+}
+.rpsHint{
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+    padding-top: 6px;
+}
+
+.rpsGrid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.rpsCard{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(108,231,255,.18);
+    background: rgba(10,14,28,.62);
+    border-radius: 18px;
+    padding: 14px 12px 12px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 16px 34px rgba(0,0,0,.35);
+    transition: transform .08s ease, background .12s ease, border-color .12s ease;
+    color: rgba(240,245,255,.96);
+}
+.rpsCard:hover{
+    border-color: rgba(108,231,255,.32);
+    background: rgba(108,231,255,.06);
+    transform: translateY(-1px);
+}
+.rpsCard:active{
+    transform: translateY(0);
+}
+.rpsIcon{
+    font-size: 22px;
+    line-height: 1;
+}
+.rpsHand{
+    margin-top: 8px;
+    font-size: 11px;
+    letter-spacing: .16em;
+    font-weight: 900;
+    color: rgba(190,205,235,.86);
+}
+.rpsOpt{
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 800;
+    color: rgba(240,245,255,.96);
+}
+.rpsSub{
+    margin-top: 10px;
+    font-size: 11px;
+    color: rgba(170,186,220,.72);
+}
+.rpsEnemyHand{
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+}
+.rpsEnemyHand b{
+    color: rgba(240,245,255,.96);
+}
+
+@media (max-width: 720px){
+    .rpsTop{ flex-direction: column; }
+    .rpsGrid{ grid-template-columns: 1fr; }
+}
+
+.rhWrap{
+    margin-top: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+    padding: 14px;
+}
+.rhTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.rhTitle{
+    font-size: 12px;
+    letter-spacing: .16em;
+    font-weight: 900;
+    color: rgba(220,245,255,.95);
+}
+.rhMeta{
+    display:flex;
+    gap: 10px;
+    flex: 1 1 auto;
+    justify-content:center;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+}
+.rhBar{
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(0,0,0,.18);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.rhBarFill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(108,231,255,.0), rgba(108,231,255,.22), rgba(108,231,255,.0));
+    transition: width .06s linear;
+}
+
+.rhLaneRow{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.rhLaneBtn{
+    -webkit-appearance:none;
+    appearance:none;
+    border: 1px solid rgba(108,231,255,.18);
+    background: rgba(10,14,28,.62);
+    border-radius: 18px;
+    padding: 14px 12px 12px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 16px 34px rgba(0,0,0,.35);
+    transition: transform .08s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+    color: rgba(240,245,255,.96);
+}
+.rhLaneBtn:hover{
+    border-color: rgba(108,231,255,.32);
+    background: rgba(108,231,255,.06);
+    transform: translateY(-1px);
+}
+.rhLaneBtn:active{
+    transform: translateY(0);
+}
+.rhLaneBtn:disabled{
+    cursor: not-allowed;
+    opacity: .55;
+}
+.rhLaneK{
+    width: 26px;
+    height: 26px;
+    border-radius: 10px;
+    border: 1px solid rgba(108,231,255,.28);
+    background: rgba(108,231,255,.10);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 900;
+    color: rgba(220,245,255,.95);
+}
+.rhLaneT{
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 900;
+    color: rgba(240,245,255,.96);
+}
+.rhLaneS{
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(190,205,235,.82);
+}
+.rhNext{
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(190,205,235,.82);
+    text-align: right;
+}
+
+@media (max-width: 720px){
+    .rhLaneRow{ grid-template-columns: 1fr; }
+    .rhMeta{ justify-content:flex-start; }
+}
+
+
+
+
