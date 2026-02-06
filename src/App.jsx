@@ -6,6 +6,7 @@ import "./index.css";
 import IssuePage from "./games/Screen/IssuePage.jsx";
 import FinalFixPage from "./games/Screen/FinalFixPage.jsx";
 import GamePage from "./pages/Game/GamePage.jsx";
+import ReportPage from "./pages/Report/ReportPage";
 
 export default function App() {
     return (
@@ -16,6 +17,7 @@ export default function App() {
                 <Route path="/games" element={<MainPage />} />
                 <Route path="/games/issue/:groupId" element={<IssuePage />} />
                 <Route path="/games/finalfix" element={<FinalFixPage />} />
+                <Route path="/report" element={<ReportPage />} />
             </Routes>
         </BrowserRouter>
     );
