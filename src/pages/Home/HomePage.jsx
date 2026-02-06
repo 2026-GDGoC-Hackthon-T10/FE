@@ -51,10 +51,10 @@ const Home = ({ onStartGame }) => {
               <span>실무 디버깅</span> 챌린지
             </h1>
             <p className="hero-sub">
-              이론으로만 배우던 CS 지식을 실제 장애 상황에서 증명하세요.
+                실무 환경에서의 데이터를 바탕으로 생성된 경험과 역량을 통해 <br></br> 당신의 가치를 증명하세요.
             </p>
             <div className="search-bar">
-                <input type="text" placeholder="관심 있는 기술 스택이나 직무를 검색해 보세요" />
+                <input type="text" placeholder="관심 있는 기술 스택이나 직무를 검색해 보세요. (ex : Python)" />
                 <button className="search-btn">
                     <svg 
                     width="20" 
@@ -79,6 +79,14 @@ const Home = ({ onStartGame }) => {
                     </svg>
                 </button>
                 </div>
+
+                <div className="search-keywords">
+                    <span className="keyword-tag">#실무_디버깅</span>
+                    <span className="keyword-tag">#Flutter</span>
+                    <span className="keyword-tag">#C++_알고리즘</span>
+                    <span className="keyword-tag">#장애_복구_시뮬레이션</span>
+                    <span className="keyword-tag">#CS_지식_검증</span>
+                </div>
           </div>
         </section>
 
@@ -92,7 +100,7 @@ const Home = ({ onStartGame }) => {
   
             <div className="card-body">
                 <h4>[신입] IT 개발자 채용</h4>
-                <p>서버 장애 대응 역량 보유자 우대</p>
+                <p>*서버 장애 대응 역량 보유자 우대</p>
             </div>
 
             {/* 지원서 제출하기 버튼 */}
@@ -103,11 +111,26 @@ const Home = ({ onStartGame }) => {
             </div>
         </div>
 
-          <div className="glass-card job-item">
-            <div className="card-tag grey">PREVIEW</div>
-            <h4>Git 충돌 마스터</h4>
-            <p>협업 역량 강화</p>
-          </div>
+          <div className="glass-card job-item side-info-card">
+            <div className="card-tag grey">
+                <span className="live-dot"></span> 채용 정보
+            </div>
+            
+            <div className="company-info-group">
+                <h4>(주)인프라 가디언즈</h4>
+            </div>
+
+            <div className="focus-details">
+                <div className="focus-row">
+                <span>핵심 역량</span>
+                <strong className="blue-highlight">서버 장애 대응</strong>
+                </div>
+                <div className="focus-row">
+                <span>검증 항목</span>
+                <strong>C++ / 리눅스 환경</strong>
+                </div>
+            </div>
+            </div>
         </div>
 
       </main>
