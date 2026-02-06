@@ -4,58 +4,32 @@ import api from "../../shared/api.js";
 import ProblemRenderer from "./ProblemRenderer.jsx";
 import "./IssueStage.css";
 
-function safeUuid() {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
-    return `sid_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-}
-
-function getOrCreateSessionId(stageNumber, incoming) {
-    const key = `quiz_session_${stageNumber}`;
-
-    if (incoming && String(incoming).trim()) {
-        const v = String(incoming).trim();
-        sessionStorage.setItem(key, v);
-        return v;
-    }
-
-    const saved = sessionStorage.getItem(key);
-    if (saved) return saved;
-
-    const created = safeUuid();
-    sessionStorage.setItem(key, created);
-    return created;
-}
-
 function normalizeOptions(question) {
-    const raw = question?.options ?? question?.choices ?? question?.selections ?? [];
+    const raw =
+        question?.options ??
+        question?.choices ??
+        question?.selections ??
+        question?.answers ??
+        [];
     if (!Array.isArray(raw)) return [];
     return raw.map((o) => String(o));
 }
 
+function pickQuestionId(q) {
+    const v = q?.questionId ?? q?.id ?? q?.qid ?? q?.data?.questionId ?? null;
+    if (v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+}
+
 export default function IssueStage({
                                        stageNumber,
-                                       sessionId,
                                        issueId,
                                        issue,
                                        isLast,
                                        onSolved,
                                        skipPre,
                                    }) {
-    // ✅ purity rule 회피: render 중 sessionStorage/Date.now 호출 안 함
-    const [sid, setSid] = useState("");
-    const [sidReady, setSidReady] = useState(false);
-
-    useEffect(() => {
-        setSidReady(false);
-        try {
-            const v = getOrCreateSessionId(stageNumber, sessionId);
-            setSid(v);
-        } finally {
-            setSidReady(true);
-        }
-    }, [stageNumber, sessionId]);
-
-    // ====== 연출(독백) ======
     const preLines = useMemo(() => {
         const a = [];
         if (issue?.title) a.push(issue.title);
@@ -63,7 +37,7 @@ export default function IssueStage({
         return a.slice(0, 2);
     }, [issue]);
 
-    const [phase, setPhase] = useState(skipPre ? "play" : "pre"); // pre | play | result
+    const [phase, setPhase] = useState(skipPre ? "play" : "pre");
     const [preIdx, setPreIdx] = useState(0);
 
     useEffect(() => {
@@ -72,6 +46,10 @@ export default function IssueStage({
     }, [issueId, skipPre]);
 
     const goNextPre = useCallback(() => {
+        if (!preLines.length) {
+            setPhase("play");
+            return;
+        }
         setPreIdx((cur) => {
             const next = cur + 1;
             if (next >= preLines.length) {
@@ -80,38 +58,46 @@ export default function IssueStage({
             }
             return next;
         });
-        if (!preLines.length) setPhase("play");
     }, [preLines.length]);
 
-    // ====== 퀴즈 상태 ======
     const [loading, setLoading] = useState(false);
-    const [questionId, setQuestionId] = useState(null);
     const [question, setQuestion] = useState(null);
+    const [qid, setQid] = useState(null);
     const [submitting, setSubmitting] = useState(false);
-
-    const [result, setResult] = useState(null); // { ok, answer, message, explanation }
+    const [result, setResult] = useState(null);
     const [error, setError] = useState("");
 
     const abortRef = useRef(false);
 
+    // 1) random -> 2) detail
     const fetchQuestion = useCallback(async () => {
         setError("");
         setLoading(true);
-        setQuestionId(null);
         setQuestion(null);
+        setQid(null);
         setResult(null);
 
         try {
-            const r1 = await api.get("/api/quiz/random", { params: { stage: stageNumber } });
-            const qid = r1?.data?.questionId ?? r1?.data?.id ?? null;
-            if (!qid) throw new Error("questionId 없음");
-
+            if (!stageNumber) throw new Error("stageNumber 없음");
             if (abortRef.current) return;
-            setQuestionId(qid);
 
-            const r2 = await api.get(`/api/quiz/${qid}`);
+            // 랜덤 문제 조회
+            const r1 = await api.get("/api/quiz/random", {
+                params: { stage: Number(stageNumber) },
+            });
             if (abortRef.current) return;
-            setQuestion(r2?.data ?? null);
+
+            const randomData = r1?.data ?? null;
+            const extractedId = pickQuestionId(randomData);
+            if (extractedId == null) throw new Error("random 응답에 questionId 없음");
+
+            // 문제 상세 조회
+            const r2 = await api.get(`/api/quiz/${extractedId}`);
+            if (abortRef.current) return;
+
+            const detailData = r2?.data ?? null;
+            setQid(extractedId);
+            setQuestion(detailData);
         } catch (e) {
             console.error(e);
             if (!abortRef.current) setError("문제를 불러오지 못했어요. 다시 시도해 주세요.");
@@ -122,11 +108,11 @@ export default function IssueStage({
 
     useEffect(() => {
         abortRef.current = false;
-        if (phase === "play" && sidReady) fetchQuestion();
+        if (phase === "play") fetchQuestion();
         return () => {
             abortRef.current = true;
         };
-    }, [phase, sidReady, fetchQuestion]);
+    }, [phase, fetchQuestion]);
 
     const titleText = useMemo(() => {
         return (
@@ -137,21 +123,15 @@ export default function IssueStage({
     }, [question, issueId]);
 
     const bodyText = useMemo(() => {
-        return (
-            question?.content ||
-            question?.question ||
-            question?.questionText ||
-            ""
-        );
+        return question?.content || question?.question || question?.questionText || "";
     }, [question]);
 
     const options = useMemo(() => normalizeOptions(question), [question]);
 
-    // ✅ ProblemRenderer가 호출할 "제출 함수"
+    // ✅ 채점 요청: sessionId 제거
     const submitAnswer = useCallback(
         async (selectedText) => {
-            if (!sidReady || !sid) throw new Error("sessionId 준비 안됨");
-            if (!questionId) throw new Error("questionId 없음");
+            if (!qid) throw new Error("questionId 없음(문제 다시 불러와야 함)");
 
             setSubmitting(true);
             setError("");
@@ -159,8 +139,7 @@ export default function IssueStage({
             try {
                 const r = await api.post("/api/quiz/submit", null, {
                     params: {
-                        sessionId: sid,
-                        questionId,
+                        questionId: qid,
                         selectedOption: String(selectedText),
                     },
                 });
@@ -181,16 +160,15 @@ export default function IssueStage({
                 };
             } catch (e) {
                 console.error(e);
-                setError("제출에 실패했어요. 네트워크 확인 후 다시 시도해 주세요.");
+                setError("제출에 실패했어요. 네트워크/서버 확인 후 다시 시도해 주세요.");
                 return { ok: false, message: "제출 실패" };
             } finally {
                 setSubmitting(false);
             }
         },
-        [sidReady, sid, questionId]
+        [qid]
     );
 
-    // ✅ ProblemRenderer에서 채점 끝나면 여기로 결과 올림
     const onResolved = useCallback((res) => {
         setResult(res);
         setPhase("result");
@@ -200,9 +178,6 @@ export default function IssueStage({
         const ok = Boolean(result?.ok);
         onSolved(ok, isLast);
     }, [result, onSolved, isLast]);
-
-    // ====== UI ======
-    if (!sidReady) return null;
 
     return (
         <div className="issueStage">
@@ -234,7 +209,7 @@ export default function IssueStage({
                                 title: titleText,
                                 content: bodyText,
                                 options,
-                                answer: question?.answer ?? question?.correctAnswer, // 있을 때만 사용
+                                answer: question?.answer ?? question?.correctAnswer,
                             }}
                             submitAnswer={submitAnswer}
                             onResolved={onResolved}
@@ -277,7 +252,7 @@ export default function IssueStage({
             <div className="stageMeta">
                 <span>stage {stageNumber}</span>
                 <span className="dot">·</span>
-                <span>session {sid ? `${sid.slice(0, 8)}…` : "-"}</span>
+                <span>questionId {qid ?? "-"}</span>
             </div>
         </div>
     );

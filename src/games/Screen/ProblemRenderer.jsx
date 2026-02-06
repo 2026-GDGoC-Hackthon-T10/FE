@@ -1,23 +1,9 @@
 // games/Screen/ProblemRenderer.jsx
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import "./IssuePage.css";
 
-/**
- * ✅ 한 파일에서 끝
- * ✅ 6개 유형 전부 분기 + 화면 포함
- * - 1) drag_patch
- * - 2) erase_line
- * - 3) type_fall_multi
- * - 4) maze_ox
- * - 5) rps_tradeoff
- * - 6) rhythm_triage
- *
- * ✅ 백엔드: 선지 텍스트 + 정답만 제공(quiz/random, quiz/{id}, submit)
- * - question: { title, content, options: string[] } 형태라고 가정(네 IssueStage에서 정규화 가능)
- * - submitAnswer(selectedText): Promise<{ ok:boolean, answer?:string, message?:string, explanation?:string }>
- */
-
-function clamp(v, a, b) {
-    return Math.max(a, Math.min(b, v));
+function clamp(n, a, b) {
+    return Math.max(a, Math.min(b, n));
 }
 
 function getProblemType(issueId) {
@@ -43,16 +29,17 @@ function cls(...xs) {
     return xs.filter(Boolean).join(" ");
 }
 
+
+
 export default function ProblemRenderer({
                                             issueId,
-                                            question, // { title, content, options: string[] } (선지 텍스트 배열)
+                                            question,
                                             loading,
                                             error,
                                             onRetry,
                                             disabled,
-
-                                            submitAnswer, // async(selectedText) => {ok, answer, message, explanation}
-                                            onResolved, // (res) => void
+                                            submitAnswer,
+                                            onResolved,
                                         }) {
     const type = useMemo(() => getProblemType(issueId), [issueId]);
 
@@ -84,22 +71,16 @@ export default function ProblemRenderer({
     switch (type) {
         case "drag_patch":
             return <DragPatchProblem {...commonProps} />;
-
         case "erase_line":
             return <EraseLineProblem {...commonProps} />;
-
         case "type_fall_multi":
             return <TypeFallMultiProblem {...commonProps} />;
-
         case "maze_ox":
             return <MazeOXProblem {...commonProps} />;
-
         case "rps_tradeoff":
             return <RpsTradeoffProblem {...commonProps} />;
-
         case "rhythm_triage":
             return <RhythmTriageProblem {...commonProps} />;
-
         default:
             return <TypeFallMultiProblem {...commonProps} />;
     }
@@ -107,63 +88,85 @@ export default function ProblemRenderer({
 
 /* =========================
  *  1) drag_patch
- *  - PATCH draggable -> 타겟 드롭으로 선택
- *  - 제출 시 선택된 "선지 텍스트"를 submitAnswer로 전송
  * ========================= */
 function DragPatchProblem({ question, disabled, submitAnswer, onResolved }) {
-    const options = Array.isArray(question.options) ? question.options : [];
-    const [selected, setSelected] = useState("");
+    const targets = Array.isArray(question.options) ? question.options : [];
+    const [picked, setPicked] = useState("");
+    const [hoverIdx, setHoverIdx] = useState(-1);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        setSelected("");
+        setPicked("");
+        setHoverIdx(-1);
         setSubmitting(false);
     }, [question]);
 
-    const onDragStart = (e) => {
-        e.dataTransfer.setData("text/plain", "PATCH");
-    };
-    const onDragOver = (e) => e.preventDefault();
-    const onDropTarget = (opt) => (e) => {
-        e.preventDefault();
-        if (disabled || submitting) return;
-        setSelected(String(opt));
-    };
+    const onDragStart = useCallback(
+        (e) => {
+            if (disabled || submitting) return;
+            e.dataTransfer.setData("text/plain", "PATCH");
+            e.dataTransfer.effectAllowed = "move";
+        },
+        [disabled, submitting]
+    );
+
+    const onDragOver = useCallback(
+        (idx) => (e) => {
+            if (disabled || submitting) return;
+            e.preventDefault();
+            setHoverIdx(idx);
+        },
+        [disabled, submitting]
+    );
+
+    const onDrop = useCallback(
+        (idx) => (e) => {
+            if (disabled || submitting) return;
+            e.preventDefault();
+            setHoverIdx(-1);
+            const v = String(targets[idx] ?? "");
+            if (v) setPicked(v);
+        },
+        [disabled, submitting, targets]
+    );
 
     const submit = useCallback(async () => {
-        if (!selected || disabled || submitting) return;
+        if (!picked || disabled || submitting) return;
         try {
             setSubmitting(true);
-            const res = await submitAnswer(String(selected));
+            const res = await submitAnswer(String(picked));
             onResolved?.(res);
         } finally {
             setSubmitting(false);
         }
-    }, [selected, disabled, submitting, submitAnswer, onResolved]);
+    }, [picked, disabled, submitting, submitAnswer, onResolved]);
 
     return (
         <div className="stagePlay">
-            <div className="stageQuestion">{question.content || "PATCH를 정답 타겟에 드롭해."}</div>
+            <div className="stageQuestion">{question.content || "PATCH를 타겟에 드롭해."}</div>
 
             <div className="patchBoard">
-                <div className="patchChip" draggable onDragStart={onDragStart}>
+                <div className="patchChip" draggable={!disabled && !submitting} onDragStart={onDragStart}>
                     PATCH
                 </div>
 
                 <div className="patchTargets">
-                    {options.map((opt, i) => {
-                        const v = String(opt);
-                        const active = selected === v;
+                    {targets.map((t, idx) => {
+                        const v = String(t);
+                        const active = picked === v;
                         return (
                             <div
-                                key={`${v}-${i}`}
-                                className={cls("patchTarget", active && "active")}
-                                onDrop={onDropTarget(v)}
-                                onDragOver={onDragOver}
+                                key={`${v}-${idx}`}
+                                className={cls("patchTarget", hoverIdx === idx && "active", active && "active")}
+                                onDragOver={onDragOver(idx)}
+                                onDragLeave={() => setHoverIdx(-1)}
+                                onDrop={onDrop(idx)}
+                                role="button"
+                                tabIndex={0}
                             >
                                 <div className="patchTargetK">TARGET</div>
                                 <div className="patchTargetT">{v}</div>
-                                <div className="patchTargetS">drop PATCH</div>
+                                <div className="patchTargetS">{active ? "선택됨" : "drop PATCH"}</div>
                             </div>
                         );
                     })}
@@ -171,21 +174,18 @@ function DragPatchProblem({ question, disabled, submitAnswer, onResolved }) {
             </div>
 
             <div className="stageActions">
-                <button className="btnPrimary" type="button" onClick={submit} disabled={!selected || disabled || submitting}>
+                <button className="btnPrimary" type="button" onClick={submit} disabled={!picked || disabled || submitting}>
                     {submitting ? "적용 중…" : "패치 적용"}
                 </button>
             </div>
 
-            <div className="stageHint">선택: {selected || "없음"}</div>
+            <div className="stageHint">선택: {picked || "없음"}</div>
         </div>
     );
 }
 
 /* =========================
  *  2) erase_line
- *  - question.options를 "라인 후보"로 사용 (문자열)
- *  - 클릭한 라인 1개만 봉인(선택)
- *  - 제출 시 선택된 라인을 submitAnswer로 전송
  * ========================= */
 function EraseLineProblem({ question, disabled, submitAnswer, onResolved }) {
     const lines = Array.isArray(question.options) ? question.options : [];
@@ -244,14 +244,10 @@ function EraseLineProblem({ question, disabled, submitAnswer, onResolved }) {
 
 /* =========================
  *  3) type_fall_multi
- *  - 떨어지는 방해물(오답 후보) 표시 + 정답 명령어 타이핑
- *  - 서버 정답은 "선지 텍스트" 중 하나라고 가정:
- *    => submitAnswer(typedText)로 그대로 보냄
- *  - 정답判定은 서버 submit 결과로 처리(프론트는 타이핑 게임만)
  * ========================= */
 function TypeFallMultiProblem({ question, disabled, submitAnswer, onResolved }) {
     const pool = Array.isArray(question.options) ? question.options : [];
-    const answerHint = ""; // 서버 정답을 프론트가 모른다는 전제면 빈 값. (서버가 answer 주면 연결 가능)
+    const answerHint = "";
     const [started, setStarted] = useState(false);
     const [typed, setTyped] = useState("");
     const [drops, setDrops] = useState([]);
@@ -383,92 +379,278 @@ function TypeFallMultiProblem({ question, disabled, submitAnswer, onResolved }) 
 }
 
 /* =========================
- *  4) maze_ox
- *  - 진짜 미로 최소: 토큰 선택 -> O/X 구역 버튼
- *  - 서버가 선지/정답만이므로, "토큰@O" 형태를 선택 텍스트로 제출
+ *  4) maze_ox  ✅ 원(플레이어) 조작 미로
+ *  - '1' = 벽, '0' = 길, 'O'/'X' = 목표
+ *  - 원(플레이어)을 드래그(터치) 또는 WASD/방향키로 이동
+ *  - O/X에 도착하면 즉시 submitAnswer("O") / submitAnswer("X")
  * ========================= */
+
+const DEFAULT_MAZE_15x11 = [
+    "111111111111111",
+    "1S0000000000001",
+    "101111011111101",
+    "101000010000001",
+    "101011110111101",
+    "100010000100001",
+    "111010111101111",
+    "1000001000000O1",
+    "101111101111101",
+    "1X0000000000001",
+    "111111111111111",
+];
+
+function normalizeMazeLines(lines) {
+    const raw = Array.isArray(lines) && lines.length ? lines.map(String) : DEFAULT_MAZE_15x11;
+    const rows = raw.length;
+    const cols = Math.max(...raw.map((r) => r.length));
+    const fixed = raw.map((r) => r.padEnd(cols, "1").slice(0, cols));
+    return { rows, cols, grid: fixed.join(""), lines: fixed };
+}
+
 function MazeOXProblem({ question, disabled, submitAnswer, onResolved }) {
-    const base = Array.isArray(question.options) ? question.options : [];
-    const tokens = base.length ? base.slice(0, 4) : ["A", "B", "C", "D"];
-    const [picked, setPicked] = useState("");
+    const mazeLines = question?.maze || question?.map || question?.mazeLines || null;
+    const { rows, cols, grid } = useMemo(() => normalizeMazeLines(mazeLines), [mazeLines]);
+
+    const idxOf = useCallback((r, c) => r * cols + c, [cols]);
+    const cellAt = useCallback((r, c) => grid[idxOf(r, c)] || "1", [grid, idxOf]);
+
+    const findCell = useCallback(
+        (ch) => {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (cellAt(r, c) === ch) return { r, c };
+                }
+            }
+            return null;
+        },
+        [rows, cols, cellAt]
+    );
+
+    const startPos = useMemo(() => findCell("S") || { r: 1, c: 1 }, [findCell]);
+    const [pos, setPos] = useState(startPos);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        setPicked("");
+        setPos(startPos);
         setSubmitting(false);
-    }, [question]);
+    }, [question, startPos]);
 
-    const submitZone = useCallback(
-        async (zone) => {
-            if (!picked || disabled || submitting) return;
-            try {
-                setSubmitting(true);
-                const payload = `${String(picked)}@${zone}`;
-                const res = await submitAnswer(payload);
-                onResolved?.(res);
-            } finally {
-                setSubmitting(false);
-            }
+    const canMoveTo = useCallback(
+        (r, c) => {
+            if (r < 0 || c < 0 || r >= rows || c >= cols) return false;
+            const ch = cellAt(r, c);
+            return ch !== "1";
         },
-        [picked, disabled, submitting, submitAnswer, onResolved]
+        [rows, cols, cellAt]
     );
 
+    const tryMove = useCallback(
+        async (nr, nc) => {
+            if (disabled || submitting) return;
+            if (!canMoveTo(nr, nc)) return;
+
+            setPos({ r: nr, c: nc });
+
+            const ch = cellAt(nr, nc);
+            if (ch === "O" || ch === "X") {
+                try {
+                    setSubmitting(true);
+                    const res = await submitAnswer(ch);
+                    onResolved?.(res);
+                } finally {
+                    setSubmitting(false);
+                }
+            }
+        },
+        [disabled, submitting, canMoveTo, cellAt, submitAnswer, onResolved]
+    );
+
+    // ✅ 포커스/키 입력 안정화
+    const rootRef = useRef(null);
+    useEffect(() => {
+        const t = setTimeout(() => rootRef.current?.focus?.(), 0);
+        return () => clearTimeout(t);
+    }, [question]);
+
+    useEffect(() => {
+        const onKey = (e) => {
+            if (disabled || submitting) return;
+
+            const tag = (e.target?.tagName || "").toLowerCase();
+            if (tag === "input" || tag === "textarea") return;
+
+            const k = e.key;
+            let dr = 0, dc = 0;
+
+            if (k === "ArrowUp" || k === "w" || k === "W") dr = -1;
+            else if (k === "ArrowDown" || k === "s" || k === "S") dr = 1;
+            else if (k === "ArrowLeft" || k === "a" || k === "A") dc = -1;
+            else if (k === "ArrowRight" || k === "d" || k === "D") dc = 1;
+            else return;
+
+            e.preventDefault();
+            tryMove(pos.r + dr, pos.c + dc);
+        };
+
+        // ✅ capture로 먼저 먹고, passive:false로 preventDefault 확실히
+        window.addEventListener("keydown", onKey, { capture: true, passive: false });
+        return () => window.removeEventListener("keydown", onKey, { capture: true });
+    }, [pos, tryMove, disabled, submitting]);
+
+    // 드래그/터치 1칸씩 이동
+    const dragRef = useRef({ down: false, last: startPos });
+    const gridRef = useRef(null);
+
+    const pointToCell = useCallback(
+        (clientX, clientY) => {
+            const el = gridRef.current;
+            if (!el) return null;
+            const rect = el.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
+
+            const cw = rect.width / cols;
+            const ch = rect.height / rows;
+            return { c: Math.floor(x / cw), r: Math.floor(y / ch) };
+        },
+        [rows, cols]
+    );
+
+    const stepToward = useCallback(
+        async (from, to) => {
+            if (!to) return from;
+            const dr = to.r - from.r;
+            const dc = to.c - from.c;
+
+            let nr = from.r;
+            let nc = from.c;
+
+            if (Math.abs(dr) >= Math.abs(dc)) nr += dr === 0 ? 0 : dr > 0 ? 1 : -1;
+            else nc += dc === 0 ? 0 : dc > 0 ? 1 : -1;
+
+            if (nr === from.r && nc === from.c) return from;
+
+            if (canMoveTo(nr, nc)) {
+                await tryMove(nr, nc);
+                return { r: nr, c: nc };
+            }
+            return from;
+        },
+        [canMoveTo, tryMove]
+    );
+
+    const onPointerDown = useCallback(
+        (e) => {
+            if (disabled || submitting) return;
+            rootRef.current?.focus?.(); // ✅ 클릭하면 포커스 잡기
+            dragRef.current.down = true;
+            dragRef.current.last = { ...pos };
+            e.currentTarget.setPointerCapture?.(e.pointerId);
+        },
+        [pos, disabled, submitting]
+    );
+
+    const onPointerMove = useCallback(
+        async (e) => {
+            if (!dragRef.current.down) return;
+            if (disabled || submitting) return;
+
+            const to = pointToCell(e.clientX, e.clientY);
+            const next = await stepToward(dragRef.current.last, to);
+            dragRef.current.last = next;
+        },
+        [pointToCell, stepToward, disabled, submitting]
+    );
+
+    const onPointerUp = useCallback(() => {
+        dragRef.current.down = false;
+    }, []);
+
+    const playerStyle = useMemo(() => {
+        const x = ((pos.c + 0.5) / cols) * 100;
+        const y = ((pos.r + 0.5) / rows) * 100;
+        return { left: `${x}%`, top: `${y}%` };
+    }, [pos, cols, rows]);
+
     return (
-        <div className="stagePlay">
-            <div className="stageQuestion">{question.content || "토큰을 골라 O/X에 배치해."}</div>
+        <div className="stagePlay" ref={rootRef} tabIndex={0}>
+            <div className="stageQuestion">{question.content || "원을 움직여 O 또는 X 구역까지 도착해."}</div>
 
-            <div className="mazeRow">
-                {tokens.map((t) => {
-                    const v = String(t);
-                    const active = picked === v;
-                    return (
-                        <button
-                            key={v}
-                            type="button"
-                            className={cls("mazeTokenBtn", active && "active")}
-                            onClick={() => setPicked(v)}
-                            disabled={disabled || submitting}
-                        >
-                            {v}
-                        </button>
-                    );
-                })}
+            <div className="mazeWrap">
+                <div className="mazeTop">
+                    <div className="mazeInfo">드래그/터치 또는 WASD/방향키</div>
+                    <div className="mazeInfo">{submitting ? "제출 중…" : "O/X에 닿으면 자동 제출"}</div>
+                </div>
+
+                <div
+                    ref={gridRef}
+                    className="mazeGrid"
+                    style={{
+                        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                        gridTemplateRows: `repeat(${rows}, 1fr)`,
+                    }}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={onPointerUp}
+                    onPointerCancel={onPointerUp}
+                >
+                    {Array.from({ length: rows * cols }).map((_, i) => {
+                        const r = Math.floor(i / cols);
+                        const c = i % cols;
+                        const ch = cellAt(r, c);
+
+                        const isWall = ch === "1";
+                        const isO = ch === "O";
+                        const isX = ch === "X";
+                        const isS = ch === "S";
+
+                        return (
+                            <div
+                                key={i}
+                                className={cls("mazeCell", isWall && "wall", isO && "zoneO", isX && "zoneX")}
+                            >
+                                {(isO || isX || isS) && (
+                                    <span className="mazeToken">{isS ? "S" : ch}</span>
+                                )}
+                            </div>
+                        );
+                    })}
+
+                    <div className="mazePlayerDot" style={playerStyle} aria-hidden="true" />
+                </div>
+
+                <div className="mazePad">
+                    <button type="button" className="mazePadBtn" onClick={() => tryMove(pos.r - 1, pos.c)} disabled={disabled || submitting}>▲</button>
+                    <div className="mazePadRow">
+                        <button type="button" className="mazePadBtn" onClick={() => tryMove(pos.r, pos.c - 1)} disabled={disabled || submitting}>◀</button>
+                        <button type="button" className="mazePadBtn" onClick={() => setPos(startPos)} disabled={disabled || submitting}>⟳</button>
+                        <button type="button" className="mazePadBtn" onClick={() => tryMove(pos.r, pos.c + 1)} disabled={disabled || submitting}>▶</button>
+                    </div>
+                    <button type="button" className="mazePadBtn" onClick={() => tryMove(pos.r + 1, pos.c)} disabled={disabled || submitting}>▼</button>
+                </div>
             </div>
 
-            <div className="mazeZones">
-                <button className="btnPrimary" type="button" onClick={() => submitZone("O")} disabled={!picked || disabled || submitting}>
-                    O 구역
-                </button>
-                <button className="btnGhost" type="button" onClick={() => submitZone("X")} disabled={!picked || disabled || submitting}>
-                    X 구역
-                </button>
-            </div>
-
-            <div className="stageHint">선택: {picked ? `${picked}` : "없음"}</div>
+            <div className="stageHint">현재: ({pos.r + 1},{pos.c + 1})</div>
         </div>
     );
 }
 
+
+
+
 /* =========================
  *  5) rps_tradeoff
- *  - 가위바위보 3개 버튼
- *  - 서버 채점은 "선지 텍스트" 기반이라고 했으니:
- *    => 각 손에 매핑되는 옵션 텍스트를 submitAnswer로 제출
  * ========================= */
 function RpsTradeoffProblem({ question, disabled, submitAnswer, onResolved }) {
     const opts = Array.isArray(question.options) ? question.options : [];
     const [submitting, setSubmitting] = useState(false);
 
-    // 옵션이 3개가 아니면 임시로 만든다
     const mapped = useMemo(() => {
         const a = String(opts[0] ?? "안전하게 롤백");
         const b = String(opts[1] ?? "빠르게 핫픽스");
         const c = String(opts[2] ?? "근본 리팩터");
-        return {
-            rock: b,
-            paper: a,
-            scissors: c,
-        };
+        return { rock: b, paper: a, scissors: c };
     }, [opts]);
 
     useEffect(() => {
@@ -521,14 +703,10 @@ function RpsTradeoffProblem({ question, disabled, submitAnswer, onResolved }) {
 
 /* =========================
  *  6) rhythm_triage
- *  - START 후, NEXT 레인 표시
- *  - 버튼을 누르면 타이밍 판정(±window)
- *  - 타이밍 OK면 "정답 선지"를 서버로 제출(서버가 answer를 같이 주면 사용)
- *    아니면 그냥 누른 레인 텍스트를 제출(서버가 채점)
  * ========================= */
 function RhythmTriageProblem({ question, disabled, submitAnswer, onResolved }) {
     const lanes = Array.isArray(question.options) ? question.options : [];
-    const correctText = String(question.answer ?? ""); // 서버가 주면 사용
+    const correctText = String(question.answer ?? "");
     const [started, setStarted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -540,7 +718,6 @@ function RhythmTriageProblem({ question, disabled, submitAnswer, onResolved }) {
     const [nowMs, setNowMs] = useState(0);
 
     const pattern = useMemo(() => {
-        // 최소 패턴: 3번 박자
         return [
             { t: 700, lane: 0 },
             { t: 1400, lane: 1 },
@@ -623,8 +800,6 @@ function RhythmTriageProblem({ question, disabled, submitAnswer, onResolved }) {
                 setIdx(nextIdx);
 
                 if (nextIdx >= pattern.length) {
-                    // ✅ 전부 성공: 서버에 "정답"을 보내야 하면 correctText 사용
-                    // (없으면 마지막으로 누른 lane 텍스트)
                     const payload = correctText || String(lanes[laneIndex] ?? `lane${laneIndex + 1}`);
                     await finish(payload);
                 }
@@ -663,7 +838,9 @@ function RhythmTriageProblem({ question, disabled, submitAnswer, onResolved }) {
           <span>
             진행 {idx}/{pattern.length}
           </span>
-                    <span>MISS {miss}/{missLimit}</span>
+                    <span>
+            MISS {miss}/{missLimit}
+          </span>
                 </div>
             </div>
 
