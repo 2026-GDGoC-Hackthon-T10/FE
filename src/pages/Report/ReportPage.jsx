@@ -1,26 +1,41 @@
 import React, { useState, useEffect } from "react";
+import api from "../../shared/api";
 import reportData from "../data/reportData.json"; 
 import "./Report.css";
 
 const ReportPage = () => {
-  const { summary, labels, messages } = reportData;
+  const [report, setReport] = useState(reportData.summary);
   const [isLoading, setIsLoading] = useState(true);
+  const { summary, labels, messages } = reportData;
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchFinalReport = async () => {
+        try {
+        await api.post("/api/game/report/unlock");
+        const response = await api.get("/api/game/report");
+        
+        if (response.data) {
+            setReport({
+            totalCorrect: response.data.totalCorrect ?? 0,
+            totalWrong: response.data.totalWrong ?? 0,
+            totalScore: response.data.totalScore ?? 0,
+            });
+        }
+        } catch (error) {
+        console.error("Data Fetch Error:", error);
+        } finally {
+        setTimeout(() => setIsLoading(false), 2000);
+        }
+    };
+    fetchFinalReport();
+    }, []);
 
   if (isLoading) {
     return (
         <div className="report-loading-container">
         <div className="ios-spinner"></div>
         <div className="loading-text-wrapper">
-            <p className="loading-text">
-            {messages.loading}
-            </p>
+            <p className="loading-text">{reportData.messages.loading}</p>
         </div>
         </div>
     );
@@ -62,7 +77,7 @@ const ReportPage = () => {
             <div className="card-icon-wrapper">{Icons.correct}</div>
             <div className="card-info">
                 <span className="label">{labels.correct}</span>
-                <span className="value">{summary.totalCorrect}</span>
+                <span className="value">{report.totalCorrect}</span>
             </div>
             </div>
 
@@ -70,7 +85,7 @@ const ReportPage = () => {
             <div className="card-icon-wrapper">{Icons.wrong}</div>
             <div className="card-info">
                 <span className="label">{labels.wrong}</span>
-                <span className="value">{summary.totalWrong}</span>
+                <span className="value">{report.totalWrong}</span>
             </div>
             </div>
 
@@ -78,7 +93,7 @@ const ReportPage = () => {
             <div className="card-icon-wrapper">{Icons.total}</div>
             <div className="card-info">
                 <span className="label">{labels.total}</span>
-                <span className="value">{summary.totalScore}</span>
+                <span className="value">{report.totalScore}</span>
             </div>
             </div>
         </div>
@@ -88,9 +103,14 @@ const ReportPage = () => {
             <p><strong>{messages.footer}</strong></p>
         </div>
 
-        <button className="back-home-btn" onClick={() => window.location.href = '/'}>
-            홈페이지로 이동
+        <button className="back-home-btn" onClick={() => window.open('https://www.linkedin.com', '_blank')}
+        >
+        관련 직무 탐색하기 ↗
         </button>
+
+        <a href="/" className="mini-home-link">
+            홈페이지로 돌아가기
+        </a>
         </div>
     </div>
   );
