@@ -1,0 +1,241 @@
+/* games/Screen/FinalFixPage.css */
+
+.finalFixPage{
+    min-height: 100vh;
+    padding: 92px 0 120px;
+    position: relative;
+}
+
+.finalTopBar{
+    position: fixed;
+    top: 18px;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+.finalMeta{
+    pointer-events: auto;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(108,231,255,.22);
+    background: rgba(8,12,26,.68);
+    backdrop-filter: blur(10px);
+}
+.finalChip{
+    font-size:12px;
+    letter-spacing:.16em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(108,231,255,.25);
+    color: rgba(210,245,255,.92);
+}
+.finalStat{
+    font-size:12px;
+    color: rgba(180,200,230,.85);
+    letter-spacing:.02em;
+}
+
+.finalBack{
+    pointer-events: auto;
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(108,231,255,.2);
+    background: rgba(8,12,26,.7);
+    color: rgba(230,245,255,.92);
+}
+
+.finalWrap{
+    width: min(980px, calc(100% - 24px));
+    margin: 0 auto;
+}
+
+.finalCard{
+    border-radius: 26px;
+    border: 1px solid rgba(108,231,255,.18);
+    background: linear-gradient(180deg, rgba(10,14,30,.92), rgba(6,10,22,.92));
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    padding: 22px 22px 26px;
+}
+
+.finalMini{
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: rgba(180,200,230,.7);
+    margin-bottom: 6px;
+}
+.finalTitle{
+    font-size: 30px;
+    font-weight: 800;
+    color: rgba(240,245,255,.95);
+}
+.finalStory{
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(190,210,240,.85);
+    line-height: 1.55;
+}
+.finalHint{
+    margin-top: 14px;
+    font-size: 12px;
+    color: rgba(180,200,230,.82);
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+}
+
+.finalPuzzle{
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 14px;
+}
+
+.slotHead{
+    font-size: 11px;
+    letter-spacing: .16em;
+    color: rgba(180,200,230,.75);
+    margin: 6px 0 10px;
+}
+
+.finalSlots{ padding: 6px; }
+.slot{
+    border-radius: 18px;
+    border: 1px solid rgba(27,42,85,.55);
+    background: rgba(6,8,14,.22);
+    padding: 14px;
+    margin-bottom: 12px;
+    min-height: 96px;
+}
+.slot.filled{ background: rgba(6,8,14,.28); }
+.slot.ok{
+    border-color: rgba(108,231,255,.32);
+    box-shadow: 0 0 0 1px rgba(108,231,255,.12);
+}
+.slot.bad{
+    border-color: rgba(255,107,107,.35);
+    box-shadow: 0 0 0 1px rgba(255,107,107,.10);
+}
+
+.slotTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom: 10px;
+}
+.slotLabel{
+    font-weight: 800;
+    letter-spacing: .12em;
+    color: rgba(220,245,255,.92);
+}
+.slotMini{
+    font-size: 11px;
+    color: rgba(180,200,230,.7);
+}
+.slotBody{ display:flex; align-items:center; justify-content:center; }
+.slotEmpty{
+    font-size: 12px;
+    color: rgba(180,200,230,.55);
+    letter-spacing:.08em;
+}
+.slotModuleName{
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(240,245,255,.95);
+    text-align:center;
+}
+.slotModuleId{
+    margin-top: 4px;
+    font-size: 11px;
+    color: rgba(180,200,230,.7);
+    text-align:center;
+}
+
+.finalModules{
+    padding: 6px;
+    border-left: 1px solid rgba(27,42,85,.35);
+}
+
+.moduleGrid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+.module{
+    border-radius: 18px;
+    border: 1px solid rgba(108,231,255,.22);
+    background: rgba(108,231,255,.06);
+    padding: 14px;
+    cursor: grab;
+    user-select:none;
+}
+.module.used{
+    opacity: .45;
+    cursor: default;
+    border-color: rgba(27,42,85,.5);
+    background: rgba(6,8,14,.2);
+}
+.module.dragging{
+    transform: scale(1.02);
+}
+.moduleName{
+    font-size: 14px;
+    font-weight: 800;
+    color: rgba(240,245,255,.95);
+}
+.moduleId{
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(180,200,230,.75);
+    letter-spacing:.08em;
+}
+.moduleSub{
+    margin-top: 10px;
+    font-size: 11px;
+    color: rgba(180,200,230,.6);
+    letter-spacing:.08em;
+}
+
+.finalActions{
+    margin-top: 14px;
+    display:flex;
+    gap: 10px;
+}
+.finalBtn{
+    flex:1;
+    padding: 14px 0;
+    border-radius: 16px;
+    border: 1px solid rgba(108,231,255,.32);
+    background: rgba(108,231,255,.10);
+    color: rgba(220,245,255,.95);
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+.finalBtn.ghost{
+    border-color: rgba(27,42,85,.65);
+    background: rgba(6,8,14,.22);
+}
+.finalBtn.dim{
+    opacity: .7;
+}
+.finalBtn:disabled{
+    opacity: .45;
+}
+
+.finalFoot{
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(180,200,230,.75);
+}

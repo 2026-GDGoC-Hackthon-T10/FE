@@ -1,269 +1,336 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import "./MainPage.css";
+import { useNavigate } from "react-router-dom";
 
 const ACTIONS = [
-    { key: "scan", label: "취약점 점검", sub: "보안 취약 지점 탐색" },
-    { key: "block", label: "오류 차단", sub: "치명 오류 유입 차단" },
-    { key: "restore", label: "기록 복구", sub: "손상된 로그 복원" },
+    { key: "scan", label: "취약점 점검", groupId: "g1" },
+    { key: "restore", label: "기록 복구", groupId: "g2" },
+    { key: "block", label: "오류 차단", groupId: "g3" },
 ];
 
+const ERROR_FRAGMENTS = [
+    "E_CONNRESET",
+    "SIGPIPE",
+    "CRC_MISMATCH",
+    "NULL_REF",
+    "TIMEOUT",
+    "FRAME_DROP",
+    "AUTH_DENIED",
+    "DB_LOCK",
+    "MEM_SPIKE",
+    "DESYNC",
+    "PACKET_LOSS",
+    "CHECKSUM_ERR",
+];
+
+const LINES = ["이게 무슨 일이지?", "내가 서버를 복구해야 된다고…", "우선 오류를 확인해보자."];
+
+function cls(...xs) {
+    return xs.filter(Boolean).join(" ");
+}
+function rand(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function readProgress() {
+    try {
+        return JSON.parse(sessionStorage.getItem("gameProgress") || "{}");
+    } catch {
+        return {};
+    }
+}
+
 export default function MainPage() {
-    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const [phase, setPhase] = useState("boot"); // boot | live
     const [selected, setSelected] = useState(null);
+    const [glitch, setGlitch] = useState(false);
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [focusFrag, setFocusFrag] = useState(null);
+
+    const [frags, setFrags] = useState([]);
+    const idRef = useRef(1);
+
+    const [lineIdx, setLineIdx] = useState(0);
+    const [bbBump, setBbBump] = useState(false);
+
+    // ✅ 완료/진행 상태
+    const [progress, setProgress] = useState(() => readProgress());
+
+    // ✅ /games로 돌아올 때(또는 새로고침) 상태 재동기화
+    useEffect(() => {
+        const sync = () => setProgress(readProgress());
+        window.addEventListener("focus", sync);
+        window.addEventListener("storage", sync);
+        return () => {
+            window.removeEventListener("focus", sync);
+            window.removeEventListener("storage", sync);
+        };
+    }, []);
 
     useEffect(() => {
-        const t = setTimeout(() => setLoading(false), 1300);
+        const t = setTimeout(() => setPhase("live"), 1350);
         return () => clearTimeout(t);
     }, []);
 
-    const selectedLabel = useMemo(
-        () => ACTIONS.find((a) => a.key === selected)?.label ?? "선택 대기",
-        [selected]
-    );
+    useEffect(() => {
+        if (phase !== "live") return;
+        const i = setInterval(() => {
+            setGlitch(true);
+            setTimeout(() => setGlitch(false), 120 + Math.random() * 180);
+        }, 900 + Math.random() * 900);
+        return () => clearInterval(i);
+    }, [phase]);
+
+    useEffect(() => {
+        if (phase !== "live") return;
+
+        const spawn = () => {
+            const id = idRef.current++;
+            const kind = Math.random() < 0.55 ? "toast" : Math.random() < 0.7 ? "stamp" : "line";
+            const x = rand(6, 94);
+            const y = kind === "line" ? rand(14, 78) : rand(12, 82);
+            const ttl = rand(900, 2400);
+
+            const text = ERROR_FRAGMENTS[Math.floor(Math.random() * ERROR_FRAGMENTS.length)];
+
+            const frag = {
+                id,
+                kind,
+                x,
+                y,
+                ttl,
+                text,
+                sub: `#${Math.floor(rand(100, 999))} · ${Math.floor(rand(5, 90))}ms`,
+                rotate: rand(-6, 6),
+                scale: rand(0.92, 1.06),
+                jitter: Math.random() < 0.35,
+                danger: Math.random() < 0.42,
+            };
+
+            setFrags((prev) => {
+                const next = [...prev, frag];
+                return next.length > 18 ? next.slice(next.length - 18) : next;
+            });
+
+            setTimeout(() => {
+                setFrags((prev) => prev.filter((f) => f.id !== id));
+            }, ttl);
+        };
+
+        const i = setInterval(() => {
+            const n = Math.random() < 0.2 ? 3 : Math.random() < 0.5 ? 2 : 1;
+            for (let k = 0; k < n; k++) spawn();
+        }, 520);
+
+        return () => clearInterval(i);
+    }, [phase]);
+
+    function openFromFrag(f) {
+        if (lineIdx < LINES.length - 1) return;
+        setFocusFrag(f);
+        setModalOpen(true);
+    }
+
+    function closeModal() {
+        setModalOpen(false);
+        setFocusFrag(null);
+    }
+
+    function isSolved(groupId) {
+        return !!progress?.[groupId]?.done;
+    }
+
+    function chooseAction(key) {
+        const action = ACTIONS.find((a) => a.key === key);
+        if (!action) return;
+
+        // ✅ 해결된 액션이면 막기
+        if (isSolved(action.groupId)) return;
+
+        setSelected(key);
+        setModalOpen(false);
+        navigate(`/games/issue/${action.groupId}`);
+    }
+
+    useEffect(() => {
+        function onKeyDown(e) {
+            if (e.key === "Escape") closeModal();
+        }
+        if (modalOpen) window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [modalOpen]);
+
+    function advanceDialogueFromClick(e) {
+        if (phase !== "live") return;
+        if (modalOpen) return;
+
+        const locked = lineIdx < LINES.length - 1;
+
+        if (locked) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            setLineIdx((i) => Math.min(i + 1, LINES.length - 1));
+            setBbBump(true);
+            setTimeout(() => setBbBump(false), 220);
+            return;
+        }
+
+        if (e.target.closest("button, a, input, textarea, .modal, .modalOverlay")) return;
+
+        setLineIdx((i) => Math.min(i + 1, LINES.length - 1));
+        setBbBump(true);
+        setTimeout(() => setBbBump(false), 220);
+    }
 
     return (
-        <View style={styles.root}>
-            <View style={styles.bgGlowA} />
-            <View style={styles.bgGlowB} />
+        <div className={cls("page", glitch && "glitch")} onMouseDown={advanceDialogueFromClick}>
+            <div className="bgScanlines" />
+            <div className="bgNoise" />
+            <div className="bgGlowA" />
+            <div className="bgGlowB" />
 
-            <View style={styles.card}>
-                <Text style={styles.title}>SECURITY CONSOLE</Text>
-                <Text style={styles.subtitle}>접속 감지 · 상태 확인 중</Text>
+            {phase === "live" && (
+                <div className="errorField" aria-hidden="true">
+                    {frags.map((f) => (
+                        <button
+                            key={f.id}
+                            type="button"
+                            className={cls("frag", f.kind, f.jitter && "jit", f.danger && "danger")}
+                            onClick={() => openFromFrag(f)}
+                            style={{
+                                left: `${f.x}vw`,
+                                top: `${f.y}vh`,
+                                transform: `translate(-50%, -50%) rotate(${f.rotate}deg) scale(${f.scale})`,
+                            }}
+                        >
+                            {f.kind === "line" ? (
+                                <div className="fragLine">
+                                    <span className="mono">{f.text}</span>
+                                    <span className="dim"> · {f.sub}</span>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="fragTop">
+                                        <span className="mono">{f.text}</span>
+                                        <span className="pill">{f.danger ? "CRIT" : "WARN"}</span>
+                                    </div>
+                                    <div className="fragSub">{f.sub}</div>
+                                </>
+                            )}
+                            <div className="fragSpark" />
+                        </button>
+                    ))}
+                </div>
+            )}
 
-                {loading ? (
-                    <View style={styles.loadingBox}>
-                        <ActivityIndicator size="large" />
-                        <Text style={styles.loadingText}>세션 초기화…</Text>
-                        <View style={styles.progressBar}>
-                            <View style={styles.progressFill} />
-                        </View>
-                    </View>
+            <div className="hudTop">
+                <div className="hudLeft">
+                    <div className="chip">CONNECTION</div>
+                    <div className="hudValue">{phase === "boot" ? "NEGOTIATING…" : "UNSTABLE"}</div>
+                </div>
+                <div className="hudRight">
+                    <div className="chip danger">SERVER</div>
+                    <div className="hudValue dangerText">CRITICAL</div>
+                </div>
+            </div>
+
+            <div className="card">
+                <div className="cardHeader">
+                    <h1 className="title" data-text="SECURITY CONSOLE">
+                        SECURITY CONSOLE
+                    </h1>
+                    <p className="subtitle">접속 감지 · 상태 확인 중</p>
+                </div>
+
+                {phase === "boot" ? (
+                    <div className="boot">
+                        <div className="bootRow">
+                            <div className="spinner" />
+                            <div>
+                                <div className="bootTitle">SESSION INIT</div>
+                                <div className="bootSub">핵심 모듈 로드…</div>
+                            </div>
+                        </div>
+                        <div className="progressBar">
+                            <div className="progressFill" />
+                        </div>
+                        <div className="bootLogs">
+                            <div className="logLine">[OK] kernel hook attached</div>
+                            <div className="logLine warn">[WARN] packet jitter detected</div>
+                            <div className="logLine err">[ERR] upstream response corrupted</div>
+                            <div className="logLine">[OK] fallback channel opened</div>
+                        </div>
+                    </div>
                 ) : (
-                    <>
-                        <View style={styles.alertBox}>
-                            <Text style={styles.alertTitle}>서버 상태: 매우 위험</Text>
-                            <Text style={styles.alertLine}>⚠ 제출 서버 불안정</Text>
-                        </View>
-
-                        <Text style={styles.prompt}>먼저 확인할 항목을 선택하세요.</Text>
-
-                        <View style={styles.actions}>
-                            {ACTIONS.map((a) => {
-                                const active = selected === a.key;
-                                return (
-                                    <Pressable
-                                        key={a.key}
-                                        onPress={() => setSelected(a.key)}
-                                        style={({ pressed }) => [
-                                            styles.actionBtn,
-                                            active && styles.actionBtnActive,
-                                            pressed && styles.actionBtnPressed,
-                                        ]}
-                                    >
-                                        <View style={styles.actionLeft}>
-                                            <Text style={[styles.actionLabel, active && styles.actionLabelActive]}>
-                                                {a.label}
-                                            </Text>
-                                            <Text style={[styles.actionSub, active && styles.actionSubActive]}>
-                                                {a.sub}
-                                            </Text>
-                                        </View>
-                                        <Text style={[styles.chev, active && styles.chevActive]}>›</Text>
-                                    </Pressable>
-                                );
-                            })}
-                        </View>
-
-                        <View style={styles.footer}>
-                            <Text style={styles.footerKey}>현재 선택</Text>
-                            <Text style={styles.footerValue}>{selectedLabel}</Text>
-                        </View>
-                    </>
+                    <div className="statusBanner">
+                        <div className="statusTitle">
+                            <span className="dotPulse" />
+                            서버 상태: <b>매우 위험</b>
+                        </div>
+                        <div className="statusSub">지직거림 감지 · 데이터 무결성 저하</div>
+                        <div className="statusMeter">
+                            <div className="meterFill" />
+                        </div>
+                    </div>
                 )}
-            </View>
-        </View>
+            </div>
+
+            {phase === "live" && (
+                <div className={cls("bottomBubble", bbBump && "bump")} role="status" aria-live="polite" data-step={`${lineIdx + 1}/${LINES.length}`}>
+                    <div className="bbAvatar">YOU</div>
+                    <div className="bbTextWrap">
+                        <div className="bbText" key={lineIdx}>
+                            {LINES[lineIdx]}
+                        </div>
+                        <div className="bbStep">
+                            {lineIdx + 1} / {LINES.length}
+                        </div>
+                    </div>
+                    <div className="bbFlash" aria-hidden="true" />
+                </div>
+            )}
+
+            {modalOpen && (
+                <div className="modalOverlay" onMouseDown={closeModal}>
+                    <div className="modal compact" onMouseDown={(e) => e.stopPropagation()}>
+                        <div className="modalHead">
+                            <div className="modalTitleRow">
+                                <div className="warnTitle">⚠ 제출 서버 불안정</div>
+                                <button className="modalClose" onClick={closeModal} aria-label="close" type="button">
+                                    ×
+                                </button>
+                            </div>
+                            <div className="modalDesc">{focusFrag ? `${focusFrag.text} · ${focusFrag.sub}` : "signal unstable"}</div>
+                        </div>
+
+                        <div className="modalBody">
+                            <div className="modalActions3">
+                                {ACTIONS.map((a) => {
+                                    const done = isSolved(a.groupId);
+                                    return (
+                                        <button
+                                            key={a.key}
+                                            type="button"
+                                            className={cls("actionPrimary", selected === a.key && "active", done && "disabled")}
+                                            onClick={() => chooseAction(a.key)}
+                                            disabled={done}
+                                            aria-disabled={done}
+                                            title={done ? "해결됨" : ""}
+                                        >
+                                            <span>{a.label}</span>
+                                            {done && <span className="actionDone">해결</span>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
-
-const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-        backgroundColor: "#070A12",
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 18,
-    },
-
-    bgGlowA: {
-        position: "absolute",
-        width: 420,
-        height: 420,
-        borderRadius: 999,
-        backgroundColor: "rgba(110,231,183,0.10)",
-        top: -140,
-        left: -120,
-    },
-    bgGlowB: {
-        position: "absolute",
-        width: 520,
-        height: 520,
-        borderRadius: 999,
-        backgroundColor: "rgba(99,102,241,0.10)",
-        bottom: -220,
-        right: -200,
-    },
-
-    card: {
-        width: "100%",
-        maxWidth: 520,
-        borderRadius: 18,
-        padding: 18,
-        backgroundColor: "rgba(12,16,28,0.92)",
-        borderWidth: 1,
-        borderColor: "rgba(148,163,184,0.18)",
-        shadowColor: "#000",
-        shadowOpacity: 0.35,
-        shadowRadius: 18,
-        shadowOffset: { width: 0, height: 12 },
-        elevation: 6,
-    },
-
-    title: {
-        color: "#E5E7EB",
-        fontSize: 18,
-        letterSpacing: 1.2,
-        fontWeight: "800",
-    },
-    subtitle: {
-        color: "rgba(229,231,235,0.65)",
-        marginTop: 6,
-        fontSize: 12,
-    },
-
-    loadingBox: {
-        marginTop: 18,
-        padding: 16,
-        borderRadius: 14,
-        backgroundColor: "rgba(2,6,23,0.75)",
-        borderWidth: 1,
-        borderColor: "rgba(148,163,184,0.14)",
-        alignItems: "center",
-        gap: 10,
-    },
-    loadingText: {
-        color: "rgba(229,231,235,0.8)",
-        fontSize: 13,
-    },
-    progressBar: {
-        width: "100%",
-        height: 10,
-        borderRadius: 999,
-        overflow: "hidden",
-        backgroundColor: "rgba(148,163,184,0.12)",
-    },
-    progressFill: {
-        width: "62%",
-        height: "100%",
-        borderRadius: 999,
-        backgroundColor: "rgba(110,231,183,0.55)",
-    },
-
-    alertBox: {
-        marginTop: 16,
-        padding: 14,
-        borderRadius: 14,
-        backgroundColor: "rgba(127,29,29,0.22)",
-        borderWidth: 1,
-        borderColor: "rgba(248,113,113,0.32)",
-    },
-    alertTitle: {
-        color: "#FCA5A5",
-        fontWeight: "800",
-        fontSize: 14,
-    },
-    alertLine: {
-        color: "rgba(254,226,226,0.9)",
-        marginTop: 6,
-        fontSize: 13,
-        fontWeight: "700",
-    },
-
-    prompt: {
-        marginTop: 14,
-        color: "rgba(229,231,235,0.75)",
-        fontSize: 12,
-    },
-
-    actions: {
-        marginTop: 10,
-        gap: 10,
-    },
-    actionBtn: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 14,
-        paddingHorizontal: 14,
-        borderRadius: 14,
-        backgroundColor: "rgba(2,6,23,0.72)",
-        borderWidth: 1,
-        borderColor: "rgba(148,163,184,0.14)",
-    },
-    actionBtnActive: {
-        borderColor: "rgba(110,231,183,0.45)",
-        backgroundColor: "rgba(16,185,129,0.10)",
-    },
-    actionBtnPressed: {
-        transform: [{ scale: 0.99 }],
-        opacity: 0.95,
-    },
-
-    actionLeft: {
-        gap: 4,
-    },
-    actionLabel: {
-        color: "#E5E7EB",
-        fontSize: 15,
-        fontWeight: "800",
-    },
-    actionLabelActive: {
-        color: "#D1FAE5",
-    },
-    actionSub: {
-        color: "rgba(229,231,235,0.55)",
-        fontSize: 12,
-        fontWeight: "600",
-    },
-    actionSubActive: {
-        color: "rgba(209,250,229,0.70)",
-    },
-    chev: {
-        color: "rgba(229,231,235,0.45)",
-        fontSize: 22,
-        fontWeight: "900",
-        marginLeft: 10,
-    },
-    chevActive: {
-        color: "rgba(167,243,208,0.85)",
-    },
-
-    footer: {
-        marginTop: 14,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(148,163,184,0.12)",
-        flexDirection: "row",
-        alignItems: "baseline",
-        justifyContent: "space-between",
-    },
-    footerKey: {
-        color: "rgba(229,231,235,0.55)",
-        fontSize: 12,
-        fontWeight: "700",
-    },
-    footerValue: {
-        color: "#E5E7EB",
-        fontSize: 13,
-        fontWeight: "900",
-    },
-});
